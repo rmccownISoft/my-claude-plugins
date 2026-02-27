@@ -58,6 +58,18 @@ Also read (if they exist):
 - `.env.example` — environment variables hint at integrations
 - Root config files (`next.config.*`, `vite.config.*`, `jest.config.*`, etc.) — reveals framework
 
+**To determine `current_focus`**, always run these git commands (if this is a git repo):
+
+```bash
+git log --oneline -10          # recent commit messages reveal active work
+git branch --show-current      # branch name often names the feature in progress
+```
+
+- If recent commits cluster around a clear theme (e.g., all touching auth, or all mentioning "chat"), use that as `current_focus`.
+- If the branch name describes a feature (e.g., `ai-chat`, `fix/payment-flow`), factor that in.
+- If git is not available or the repo has no commits, set `current_focus` to `""` (empty string).
+- If commits exist but show no clear pattern (maintenance, mixed concerns), set `current_focus` to `"stable"`.
+
 If the user has provided a verbal description in the conversation, incorporate it — it often
 captures intent and domain context that code alone doesn't reveal.
 
