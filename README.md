@@ -19,13 +19,14 @@ my-claude-skills/
 
 ## Skills
 
-| Skill | Description |
-|---|---|
+| Skill                                                 | Description                                                 |
+| ----------------------------------------------------- | ----------------------------------------------------------- |
 | [project-summarizer](src/project-summarizer/SKILL.md) | Generates and maintains a PROJECT.md for any JS/TS codebase |
 
 ## Workflow
 
 ### Add a new skill
+
 ```bash
 mkdir src/my-new-skill
 # Create src/my-new-skill/SKILL.md
@@ -34,6 +35,7 @@ mkdir src/my-new-skill
 ```
 
 ### Update an existing skill
+
 ```bash
 # Edit src/skill-name/SKILL.md
 ./build.sh skill-name
@@ -41,11 +43,13 @@ mkdir src/my-new-skill
 ```
 
 ### Build and install everything
+
 ```bash
 ./install.sh --build
 ```
 
 ### On a new machine
+
 ```bash
 git clone <this-repo>
 cd my-claude-skills
@@ -68,6 +72,25 @@ To override the install path: `CLAUDE_SKILLS_DIR=/your/path ./install.sh`
 ## Versioning Convention
 
 Skills are versioned via git — no manual version numbers needed. To see the history of a skill:
+
 ```bash
 git log --oneline -- src/project-summarizer/SKILL.md
 ```
+
+## Skill Details
+
+### project-summarizer
+
+- **Description:** Generates and maintains a `PROJECT.md` for any JS/TS codebase. Intended to be linked to by Claude.md in order to keep the Claude file minimal
+- **Capabilities:**
+  - Project structure analysis
+  - Dependency overview
+  - Auto-updating summaries
+
+### quick-plan
+
+- **Description:** A slimmer alternative to the Superpowers brainstorm skill. Intended to be used when I just need a plan for a new feature without all of the overhead for sub-agent and spec support. The superpowers brainstorm skill invocation for a simple feature ends up using 50% daily Claude usage in our org.
+- **Capabilities:**
+  - Checks for docs/PROJECT.md rather than searching entire codebase
+  - Tries to fill in gaps
+  - Still allows superpowers:executing-plans skill to help implement (untested)
