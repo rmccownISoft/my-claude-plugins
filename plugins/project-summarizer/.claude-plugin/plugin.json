@@ -1,0 +1,14 @@
+{
+    "name": "project-summarizer",
+    "version": "0.1.0",
+    "description": "Creates and incrementally updates a PROJECT.md file that gives Claude or any LLM instant orientation to a codebase  without needing to reconstruct project understanding from scratch each session.",
+    "author": {
+        "name": "Robert McCown",
+        "email": "robertmccown2@gmail.com"
+    },
+    "keywords": [
+        "planning",
+        "documentation",
+        "project-structure"
+    ]
+}

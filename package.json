@@ -1,0 +1,19 @@
+{
+  "name": "my-claude-plugins",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "sync": "tsx scripts/sync-marketplace.ts",
+    "build": "pnpm -r --filter './plugins/**/mcp-server' run bundle",
+    "typecheck": "tsc --build",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}
