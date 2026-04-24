@@ -1,0 +1,39 @@
+{
+  "name": "rmccown-claude-plugins",
+  "owner": {
+    "name": "Robert McCown",
+    "email": "robertmccown2@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "project-summarizer",
+      "source": "./plugins/project-summarizer",
+      "description": "Creates and incrementally updates a PROJECT.md file that gives Claude or any LLM instant orientation to a codebase  without needing to reconstruct project understanding from scratch each session.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Robert McCown",
+        "email": "robertmccown2@gmail.com"
+      },
+      "keywords": [
+        "planning",
+        "documentation",
+        "project-structure"
+      ]
+    },
+    {
+      "name": "quick-plan",
+      "source": "./plugins/quick-plan",
+      "description": "Use when the user has rough or loosely organized thoughts about what to build next and wants to move directly to an implementation plan without a full brainstorming session, spec document, or design review.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Robert McCown",
+        "email": "robertmccown2@gmail.com"
+      },
+      "keywords": [
+        "planning",
+        "documentation",
+        "project-structure"
+      ]
+    }
+  ]
+}
