@@ -6,6 +6,23 @@
   },
   "plugins": [
     {
+      "name": "ingest-codex",
+      "source": "./plugins/ingest-codex",
+      "description": "Ingests an iSoftData Svelte component into the Codex memory bank by reading source files directly in the component repo, resolving types from imports, and writing the entry JSON to the sibling isoft-memory-experiment repo.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Robert McCown",
+        "email": "rmccown@isoftdata.com"
+      },
+      "keywords": [
+        "codex",
+        "ingestion",
+        "svelte",
+        "components",
+        "internal-ui"
+      ]
+    },
+    {
       "name": "project-summarizer",
       "source": "./plugins/project-summarizer",
       "description": "Creates and incrementally updates a PROJECT.md file that gives Claude or any LLM instant orientation to a codebase  without needing to reconstruct project understanding from scratch each session.",
