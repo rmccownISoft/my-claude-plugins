@@ -1,0 +1,16 @@
+{
+    "name": "ingest-codex",
+    "version": "0.1.0",
+    "description": "Ingests an iSoftData Svelte component into the Codex memory bank by reading source files directly in the component repo, resolving types from imports, and writing the entry JSON to the sibling isoft-memory-experiment repo.",
+    "author": {
+        "name": "Robert McCown",
+        "email": "rmccown@isoftdata.com"
+    },
+    "keywords": [
+        "codex",
+        "ingestion",
+        "svelte",
+        "components",
+        "internal-ui"
+    ]
+}
