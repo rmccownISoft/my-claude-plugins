@@ -51,6 +51,21 @@
         "documentation",
         "project-structure"
       ]
+    },
+    {
+      "name": "vault",
+      "source": "./plugins/vault",
+      "description": "Save a learning note to the personal-learning-vault repo when the user flags a topic with the 'Vault:' trigger, regardless of which project they're currently in.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Robert McCown",
+        "email": "robertmccown2@gmail.com"
+      },
+      "keywords": [
+        "notes",
+        "learning",
+        "knowledge-base"
+      ]
     }
   ]
 }
