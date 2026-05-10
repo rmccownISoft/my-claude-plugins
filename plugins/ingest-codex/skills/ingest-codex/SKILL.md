@@ -29,8 +29,10 @@ The component repo and the codex repo are siblings under the same parent:
 Derive the review path at runtime:
 
 ```bash
-CODEX_REVIEW="$(dirname $(pwd))/isoft-memory-experiment/review"
-CODEX_INGESTION="$(dirname $(pwd))/isoft-memory-experiment/ingestion"
+CODEX_ROOT="$(dirname $(pwd))/isoft-memory-experiment"
+CODEX_REVIEW="$CODEX_ROOT/review"
+CODEX_INGESTION="$CODEX_ROOT/ingestion"
+CODEX_PROGRESS="$CODEX_ROOT/PROGRESS.md"
 ```
 
 ---
@@ -167,7 +169,35 @@ This produces:
 
 ---
 
-## Step 6 — Report to the user
+## Step 6 — Update PROGRESS.md
+
+Read `$CODEX_PROGRESS` and make two edits:
+
+**6a.** Add a row for this component to the `## Components` table (just before the closing `---` after the table). Use the phase `processed` and leave `Model Used` and `Notes` empty:
+
+```
+| <ComponentName> | `processed` | | |
+```
+
+If a row for `<ComponentName>` already exists, update its phase to `processed` instead of adding a duplicate.
+
+**6b.** Append a Next Steps section for this component at the bottom of the file, matching the format used by recent entries:
+
+```
+## <ComponentName> Next Steps
+Review: review/<ComponentName>.md
+Edit if needed: review/<ComponentName>.entry.json
+Insert: cd isoft-memory-experiment/mcp && npm run insert -- ../review/<ComponentName>.entry.json
+Activate: npm run activate -- <entry-id>
+```
+
+Use the `entry.id` from the JSON produced in Step 4 as `<entry-id>`. If a Next Steps section for this component already exists, replace it rather than duplicating.
+
+Do not touch the Stats block — it is maintained separately.
+
+---
+
+## Step 7 — Report to the user
 
 Tell the user:
 - The output files that were written
