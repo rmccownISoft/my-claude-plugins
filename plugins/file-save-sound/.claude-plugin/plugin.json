@@ -1,0 +1,16 @@
+{
+    "name": "file-save-sound",
+    "version": "0.1.0",
+    "description": "Plays a system sound whenever Claude writes or edits a file.",
+    "author": {
+        "name": "Robert McCown",
+        "email": "rmccown@isoftdata.com"
+    },
+    "keywords": [
+        "hooks",
+        "sound",
+        "notification",
+        "audio"
+    ],
+    "hooks": "./hooks/hooks.json"
+}
