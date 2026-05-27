@@ -43,6 +43,19 @@ pnpm run sync
 4. Run `pnpm run sync` to auto-discover and add to marketplace
 
 The sync script scans `plugins/` and automatically discovers all plugins with valid `plugin.json` files. Add a plugin directory and it shows up. Remove one and it disappears.
+5. Versioning: see below.
+
+### Versioning
+
+Version is resolved in this order:
+
+1. `version` in `plugin.json`
+2. `version` in the marketplace entry
+3. Git commit SHA (if both are omitted)
+
+Setting `version` pins the plugin. If `plugin.json` declares `"version": "1.0.0"`, pushing new commits without changing that string does nothing for existing users — Claude Code sees the same version and keeps the cached copy. Bump the field on every release, or omit it entirely to use the git commit SHA (every commit becomes a new version automatically).
+
+Avoid setting `version` in both `plugin.json` and the marketplace entry. The `plugin.json` value always wins silently, so a stale manifest version can mask a version you set in `marketplace.json`.
 
 ## License
 
