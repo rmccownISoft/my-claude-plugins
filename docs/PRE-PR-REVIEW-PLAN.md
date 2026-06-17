@@ -189,9 +189,32 @@ At each phase the skill stays shippable: it just has fewer reviewers.
 
 ## Open questions
 
-- [ ] Final plugin/skill name and whether to namespace it (`isoft-` prefix?).
-- [ ] Is `master` always the base, or should the skill detect the default branch?
+- [x] Final plugin/skill name and whether to namespace it — **`isoft-pre-pr-review`** (namespaced).
+- [x] Is `master` always the base, or detect the default branch? — **detect** (`origin/HEAD` → local `main`/`master` fallback → ask; see SKILL Step 2).
 - [ ] Exact `docs/reviews/` location — always in the reviewed repo, or configurable?
 - [ ] Which Jira project keys are in use (for branch-name parsing)?
-- [ ] Set a `version` in `plugin.json` or rely on git SHA auto-versioning (see repo README)?
+- [x] Set a `version` in `plugin.json` or rely on git SHA — **manual `version` field**, bump on each release.
 ```
+
+---
+
+## Future tooling (beyond Phase 8, net-new scope)
+
+### Reviewer eval harness
+
+A **separate sibling skill** (not a phase of this one) to score the reviewer
+prompts and catch regressions as they're tuned across phases.
+
+- **Golden fixtures:** small diffs with *planted* bugs (off-by-one, swallowed
+  exception, lying `as` cast, etc.) plus clean diffs with none.
+- **Scores:** **recall** (found the planted bugs?), **precision** (no fabrication
+  or refactor-noise leak?), **verdict correctness** (gate landed right?).
+- **Why:** a human tuning prompts by hand won't notice silent regressions — e.g.
+  Phase 0 testing caught the bugs reviewer *fabricating line numbers* on a
+  177-line file. A fixture suite catches that class of drift automatically.
+- **Two distinct mechanisms, solved separately:**
+  1. *Guardrail (in-skill, every run)* — SKILL Step 6 validates every cited
+     `file:line` resolves before writing the report. **Done in Phase 0.**
+  2. *Eval harness (separate dev-time skill)* — build once 2–3 reviewers exist so
+     it scores *any* reviewer rather than being rebuilt per reviewer. Deserves its
+     own plan/ADR.
