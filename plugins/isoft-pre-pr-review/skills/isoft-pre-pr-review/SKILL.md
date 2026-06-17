@@ -150,15 +150,23 @@ When the reviewer(s) return:
 2. **Strip any refactor-flavored findings that slipped through** (anything whose
    only substance is "cleaner / more idiomatic / extract / DRY"). This is the
    second enforcement point for rule 1.
-3. Count findings by severity (Blocker / Should-fix / Minor) across all sections.
-4. Compute the verdict:
+3. **Validate every cited location.** For each finding, confirm its `file:line`
+   actually exists — the file is in the changed set and the line is within the
+   file (or the quoted snippet genuinely appears in it). Reviewers occasionally
+   fabricate line numbers; do not pass them through. For any finding whose
+   location does not resolve: re-locate it from the diff if the described defect
+   is real, otherwise drop the finding and note in the terminal summary that a
+   finding was dropped for an unverifiable location. Never write a `file:line`
+   into the report that you have not confirmed.
+4. Count findings by severity (Blocker / Should-fix / Minor) across all sections.
+5. Compute the verdict:
    - **No** if there is **any Blocker** (later phases also: any failing test or
      eslint error).
    - **With fixes** if there are Should-fix or Minor findings but no Blocker.
    - **Yes** if nothing of substance was found.
-5. Write the report to `docs/reviews/YYYY-MM-DD-<branch>-review.md` **in the repo
+6. Write the report to `docs/reviews/YYYY-MM-DD-<branch>-review.md` **in the repo
    under review**. Create `docs/reviews/` if it does not exist. Use today's date.
-6. Print a short terminal summary: the verdict, the counts, and the report path.
+7. Print a short terminal summary: the verdict, the counts, and the report path.
 
 ### Report shape
 
