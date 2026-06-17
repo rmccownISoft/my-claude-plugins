@@ -1,11 +1,6 @@
 ---
 name: isoft-pre-pr-review
-description: >-
-  Manual pre-PR review for ISoft branches. Dispatches independent reviewer
-  subagents in parallel against the branch diff and writes one categorized
-  report ending in a clear "Ready to hand off?" verdict. Run it on your
-  branch BEFORE opening a PR to catch the mistakes a human reviewer would.
-  User-invocable only.
+description: 'Manual pre-PR review for ISoft branches. Dispatches independent reviewer subagents in parallel against the branch diff and writes one categorized report ending in a clear "Ready to hand off?" verdict. Run it on your branch BEFORE opening a PR to catch the mistakes a human reviewer would. User-invocable only.'
 disable-model-invocation: true
 ---
 
