@@ -48,6 +48,11 @@ Hard rules:
   will be dropped.
 - **Confirm before reporting.** If you cannot describe a concrete input or state
   that triggers the wrong behavior, it is not a finding — leave it out.
+- **Cite real, verifiable locations.** The line number must come from the actual
+  diff hunk or the file you read — never estimate or invent one. If you are not
+  certain of the line, omit the number and instead quote the offending snippet
+  (or name the function/section) so a reader can locate it unambiguously. A
+  fabricated `file:line` is worse than none.
 - Do not propose refactors. A one-line fix direction is fine; do not rewrite.
 - Do not write files. Findings inline only.
 
@@ -66,7 +71,7 @@ Output (markdown, no preamble):
 
 ### 1. <short title>
 **Severity:** Blocker | Should-fix | Minor
-**Location:** `path/to/file:line`
+**Location:** `path/to/file:line` (or `path/to/file` + a quoted snippet if unsure of the line)
 **What breaks:** <the wrong behavior, in plain English>
 **Repro:** <minimal input or scenario that triggers it>
 **Fix direction (optional):** <one line — no code rewrite>
