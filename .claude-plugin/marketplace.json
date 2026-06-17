@@ -5,25 +5,21 @@
     "email": "robertmccown2@gmail.com"
   },
   "plugins": [
-      {
-      "name": "enterprise-mcp",
-      "displayName": "ITrack Enterprise",
-      "description": "Skills for the ITrack Enterprise MCP server",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/rmccownISoft/test-skills-as-plugin.git",
-        "path": "enterprise"
-      }
-    },
     {
-      "name": "presage-mcp",
-      "displayName": "ITrack Presage",
-      "description": "Skills for the ITrack Presage Analytics MCP server",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/rmccownISoft/test-skills-as-plugin.git",
-        "path": "presage"
-      }
+      "name": "file-save-sound",
+      "source": "./plugins/file-save-sound",
+      "description": "Plays a system sound whenever Claude writes or edits a file.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Robert McCown",
+        "email": "rmccown@isoftdata.com"
+      },
+      "keywords": [
+        "hooks",
+        "sound",
+        "notification",
+        "audio"
+      ]
     },
     {
       "name": "ingest-codex",
@@ -40,6 +36,22 @@
         "svelte",
         "components",
         "internal-ui"
+      ]
+    },
+    {
+      "name": "isoft-pre-pr-review",
+      "source": "./plugins/isoft-pre-pr-review",
+      "description": "Manual pre-PR review squad. Fans out independent reviewer subagents against the branch diff and writes one categorized report ending in a Ready-to-hand-off verdict. Run it on your branch before opening a PR.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Robert McCown",
+        "email": "rmccown@isoftdata.com"
+      },
+      "keywords": [
+        "code-review",
+        "pre-pr",
+        "isoft",
+        "quality-gate"
       ]
     },
     {
@@ -70,22 +82,6 @@
         "planning",
         "documentation",
         "project-structure"
-      ]
-    },
-    {
-      "name": "file-save-sound",
-      "source": "./plugins/file-save-sound",
-      "description": "Plays a system sound whenever Claude writes or edits a file.",
-      "version": "0.1.0",
-      "author": {
-        "name": "Robert McCown",
-        "email": "rmccown@isoftdata.com"
-      },
-      "keywords": [
-        "hooks",
-        "sound",
-        "notification",
-        "audio"
       ]
     },
     {
