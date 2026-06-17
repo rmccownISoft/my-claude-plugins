@@ -1,0 +1,15 @@
+{
+    "name": "isoft-pre-pr-review",
+    "version": "0.1.0",
+    "description": "Manual pre-PR review squad. Fans out independent reviewer subagents against the branch diff and writes one categorized report ending in a Ready-to-hand-off verdict. Run it on your branch before opening a PR.",
+    "author": {
+        "name": "Robert McCown",
+        "email": "rmccown@isoftdata.com"
+    },
+    "keywords": [
+        "code-review",
+        "pre-pr",
+        "isoft",
+        "quality-gate"
+    ]
+}

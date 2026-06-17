@@ -1,0 +1,177 @@
+---
+name: isoft-pre-pr-review
+description: >-
+  Manual pre-PR review for ISoft branches. Dispatches independent reviewer
+  subagents in parallel against the branch diff and writes one categorized
+  report ending in a clear "Ready to hand off?" verdict. Run it on your
+  branch BEFORE opening a PR to catch the mistakes a human reviewer would.
+  User-invocable only.
+disable-model-invocation: true
+---
+
+# ISoft Pre-PR Review
+
+Run this on a feature branch before opening a PR. It gathers the branch diff,
+dispatches a squad of independent reviewer subagents in parallel, assembles
+their findings into one categorized report, computes a **Ready to hand off?**
+verdict, and writes the report to a file in the repo under review.
+
+> **Phase 0 (current):** one reviewer wired up — Potential Bugs. The pipeline
+> is complete end-to-end; later phases add reviewers without changing this flow.
+
+Invocation: `/isoft-pre-pr-review` or `/isoft-pre-pr-review <TICKET-KEY>`.
+(The ticket arg is accepted now but unused until the Case Alignment reviewer lands.)
+
+## Cross-cutting rules (every reviewer must obey)
+
+These are prepended to every reviewer prompt. They are the reason this review
+is a gate and not nitpicking:
+
+1. **No refactor suggestions.** A finding must be a concrete defect: a bug with
+   a repro, an exploit path, a missing/wrong doc, a missing/failing test, or a
+   violation of a written CLAUDE.md rule or established repo pattern.
+   "Could be cleaner / more idiomatic / extract a helper / DRY this up" is **not**
+   a finding and is dropped at both the reviewer and assembly stages.
+2. **Evidence required.** Every finding needs `file:line`, what's wrong, why it
+   matters, and for bugs a concrete repro/scenario. Confirm before reporting —
+   no speculation.
+3. **Scope to the diff.** Read surrounding code only to confirm a finding; do
+   not review the whole repo.
+4. **Exclusions.** Ignore lockfiles, `dist/`, `build/`, `node_modules/`, images,
+   and pure auto-generated/synced manifests (e.g. a repo's `marketplace.json`).
+
+## Step 1 — Gather context
+
+Run these from the repo root (use the Bash tool; they are read-only git queries):
+
+```bash
+git rev-parse --abbrev-ref HEAD                       # current branch
+git rev-parse --abbrev-ref origin/HEAD                # default branch as origin/<name>, may fail
+git branch --format='%(refname:short)'                # local branches (fallback base detection)
+git ls-files --others --exclude-standard              # untracked files
+git ls-files '**/CLAUDE.md' 'CLAUDE.md'               # CLAUDE.md files in the repo (for later phases)
+```
+
+## Step 2 — Resolve the base branch
+
+The base is the branch this work will merge into. Detect it, do not assume:
+
+1. If `git rev-parse --abbrev-ref origin/HEAD` succeeded, the base is that value
+   (e.g. `origin/main`). Use it verbatim as the diff base.
+2. Otherwise, fall back to the first of these that exists as a local branch:
+   `main`, then `master`. Use the local name (e.g. `master`).
+3. If neither exists, ask the user which branch to diff against. Do not guess.
+
+Record the resolved base; every diff below uses it. Let `BASE` denote it.
+
+## Step 3 — Detect scope (committed work only)
+
+This is a **pre-PR** review, so the unit of review is the **committed branch diff
+vs `BASE`** — exactly what the PR will contain. Uncommitted and untracked changes
+are **not** reviewed; they won't be in the PR. This is a deliberate decision —
+see [ADR-0001](../../../../docs/adr/0001-pre-pr-review-committed-only-scope.md).
+
+Gather:
+
+- **committed diff** (what gets reviewed): `git diff BASE...HEAD --stat`
+- **loose work** (for a warning only):
+  - uncommitted tracked: `git diff HEAD --stat`
+  - untracked: `git ls-files --others --exclude-standard`
+
+Decision rules:
+
+1. **Committed diff has files** → review it. If any loose work exists, prepend a
+   warning to the report header and the terminal summary, e.g.:
+   _"⚠ N uncommitted + M untracked file(s) are NOT included in this review — they
+   aren't part of the PR. Commit them and re-run if they should be reviewed."_
+2. **Committed diff empty, but loose work exists** → do not dispatch. Warn:
+   _"No committed changes vs `BASE`. You have N uncommitted / M untracked file(s)
+   — commit them first, then re-run."_ Stop.
+3. **Nothing anywhere** → respond _"No changes to review."_ and stop.
+
+Apply the exclusions from the cross-cutting rules to the committed diff.
+
+## Step 4 — Gather diff stats for the report header
+
+For the chosen scope, capture:
+
+```bash
+git diff BASE...HEAD --stat        # (branch-diff scope) file/line counts
+git log BASE..HEAD --oneline       # (branch-diff scope) commit one-liners
+```
+
+Note the file count and commit count for the report header.
+
+## Step 5 — Dispatch reviewers
+
+Issue all applicable reviewers as `Task` calls **in a single message** so they
+run in parallel. (Phase 0: just the Potential Bugs reviewer — but keep the
+single-message dispatch shape so adding reviewers needs no restructuring.)
+
+For each reviewer:
+
+- `subagent_type`: `general-purpose` (reviewers need full read/grep access)
+- `description`: the reviewer's short name (e.g. "Potential Bugs review")
+- `prompt`: the contents of the reviewer file under `reviewers/`, with the
+  **shared context block** below prepended.
+
+Shared context block to prepend (fill in from the steps above):
+
+```
+## Scope
+Branch: <current branch>
+Base: <BASE>
+Read the committed diff yourself with:
+  git diff <BASE>...HEAD
+This is the exact set of changes the PR will contain. Uncommitted and untracked
+work is out of scope and must not be reviewed.
+Do NOT paste-review from this prompt — read the diff via git.
+
+## Cross-cutting rules
+1. No refactor suggestions — concrete defects only.
+2. Every finding needs file:line, what's wrong, why it matters, and a repro.
+3. Scope to the diff; read surrounding code only to confirm a finding.
+4. Ignore lockfiles, dist/, build/, node_modules/, images, generated manifests.
+```
+
+## Step 6 — Assemble and write the report
+
+When the reviewer(s) return:
+
+1. Concatenate each reviewer's output verbatim under its section heading.
+   Do not re-rank or summarize their findings.
+2. **Strip any refactor-flavored findings that slipped through** (anything whose
+   only substance is "cleaner / more idiomatic / extract / DRY"). This is the
+   second enforcement point for rule 1.
+3. Count findings by severity (Blocker / Should-fix / Minor) across all sections.
+4. Compute the verdict:
+   - **No** if there is **any Blocker** (later phases also: any failing test or
+     eslint error).
+   - **With fixes** if there are Should-fix or Minor findings but no Blocker.
+   - **Yes** if nothing of substance was found.
+5. Write the report to `docs/reviews/YYYY-MM-DD-<branch>-review.md` **in the repo
+   under review**. Create `docs/reviews/` if it does not exist. Use today's date.
+6. Print a short terminal summary: the verdict, the counts, and the report path.
+
+### Report shape
+
+```markdown
+# Pre-PR Review — <branch>
+_<N> commits, <X> files changed vs <BASE>_   ·   Ticket: <KEY or "none">
+
+## Strengths
+- <genuine strengths, if any>
+
+## Potential Bugs         *N findings*
+<reviewer output verbatim>
+
+---
+## Handoff Summary
+- Blockers: N · Should-fix: N · Minor: N
+**Ready to hand off? — Yes | With fixes | No.**
+<one line: what must be resolved first, if anything>
+```
+
+Later phases add `## Security Issues`, `## Tests`, `## Conventions`,
+`## Documentation`, `## Component Reuse`, and (conditional) `## Case Alignment`
+sections above the Handoff Summary, plus Tests/ESLint into the verdict gate.
