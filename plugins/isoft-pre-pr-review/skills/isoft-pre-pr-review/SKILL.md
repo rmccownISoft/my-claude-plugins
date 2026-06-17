@@ -46,7 +46,7 @@ Run these from the repo root (use the Bash tool; they are read-only git queries)
 
 ```bash
 git rev-parse --abbrev-ref HEAD                       # current branch
-git rev-parse --abbrev-ref origin/HEAD                # default branch as origin/<name>, may fail
+git rev-parse --abbrev-ref origin/HEAD 2>/dev/null    # default branch as origin/<name>; empty + non-zero exit if unset
 git branch --format='%(refname:short)'                # local branches (fallback base detection)
 git ls-files --others --exclude-standard              # untracked files
 git ls-files '**/CLAUDE.md' 'CLAUDE.md'               # CLAUDE.md files in the repo (for later phases)
@@ -56,11 +56,18 @@ git ls-files '**/CLAUDE.md' 'CLAUDE.md'               # CLAUDE.md files in the r
 
 The base is the branch this work will merge into. Detect it, do not assume:
 
-1. If `git rev-parse --abbrev-ref origin/HEAD` succeeded, the base is that value
-   (e.g. `origin/main`). Use it verbatim as the diff base.
+1. Accept `git rev-parse --abbrev-ref origin/HEAD` as the base **only if it both
+   exits 0 and prints a real ref** (e.g. `origin/main`). When `origin/HEAD` is
+   unset, this command exits non-zero **and prints the literal string
+   `origin/HEAD`** — do NOT accept that. Treat exit≠0, empty output, or output
+   equal to `origin/HEAD` as "not resolved" and fall through to rule 2.
 2. Otherwise, fall back to the first of these that exists as a local branch:
    `main`, then `master`. Use the local name (e.g. `master`).
 3. If neither exists, ask the user which branch to diff against. Do not guess.
+
+Before continuing, sanity-check the resolved base: `git rev-parse --verify BASE`
+must succeed. If it doesn't, the base is wrong — fall back (rule 2) or ask
+(rule 3) rather than running diffs against a bogus ref.
 
 Record the resolved base; every diff below uses it. Let `BASE` denote it.
 
