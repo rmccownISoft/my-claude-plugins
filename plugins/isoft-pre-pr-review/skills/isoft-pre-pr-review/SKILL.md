@@ -16,8 +16,9 @@ dispatches a squad of independent reviewer subagents in parallel, assembles
 their findings into one categorized report, computes a **Ready to hand off?**
 verdict, and writes the report to a file in the repo under review.
 
-> **Phase 2 (current):** two reviewers wired up — Security Issues and Potential
-> Bugs. The pipeline is complete end-to-end; later phases add reviewers without
+> **Phase 5 (current):** three reviewers wired up — Security Issues, Potential
+> Bugs, and Documentation. (Phases 3–4, Tests and Conventions, are not yet built.)
+> The pipeline is complete end-to-end; later phases add reviewers without
 > changing this flow.
 
 Invocation: `/isoft-pre-pr-review` or `/isoft-pre-pr-review <TICKET-KEY>`.
@@ -113,8 +114,9 @@ Note the file count and commit count for the report header.
 ## Step 5 — Dispatch reviewers
 
 Issue all applicable reviewers as `Task` calls **in a single message** so they
-run in parallel. (Phase 2: the Security Issues and Potential Bugs reviewers —
-dispatch both in one message; adding more reviewers needs no restructuring.)
+run in parallel. (Phase 5: the Security Issues, Potential Bugs, and Documentation
+reviewers — dispatch all three in one message; adding more reviewers needs no
+restructuring.)
 
 For each reviewer:
 
@@ -201,6 +203,9 @@ _<N> commits, <X> files changed vs <BASE>_   ·   Ticket: <KEY or "none">
 ## Potential Bugs         *N findings*
 <reviewer output verbatim>
 
+## Documentation          *N findings*
+<reviewer output verbatim>
+
 ---
 ## Handoff Summary
 
@@ -208,6 +213,7 @@ _<N> commits, <X> files changed vs <BASE>_   ·   Ticket: <KEY or "none">
 |----------------|:--------:|:----------:|:-----:|
 | Security       |    N     |     N      |   N   |
 | Potential Bugs |    N     |     N      |   N   |
+| Documentation  |   n/a    |     N      |   N   |
 | **Total**      |  **N**   |   **N**    | **N** |
 
 Tests: <pass/fail or skipped>  ·  ESLint: <clean/errors/skipped>
@@ -223,9 +229,14 @@ Tests: <pass/fail or skipped>  ·  ESLint: <clean/errors/skipped>
 **Ready to hand off? — Yes | With fixes | No.**
 ```
 
-Later phases add `## Tests`, `## Conventions`, `## Documentation`,
-`## Component Reuse`, and (conditional) `## Case Alignment` sections above the
-Handoff Summary — each becomes its own row in the table, and its
-Blockers/Should-fix items flow into the two lists. Tests/ESLint also fold into
-the verdict gate. (The table shows Security and Potential Bugs rows today because
-those are the two reviewers wired up in Phase 2.)
+The Documentation row shows `n/a` in the Blockers column on purpose: the
+Documentation reviewer caps at Should-fix and can never produce a Blocker, so it
+cannot flip the verdict to "No". Its Should-fix/Minor items still flow into the
+lists and the Total.
+
+Later phases add `## Tests`, `## Conventions`, `## Component Reuse`, and
+(conditional) `## Case Alignment` sections above the Handoff Summary — each
+becomes its own row in the table, and its Blockers/Should-fix items flow into the
+two lists. Tests/ESLint also fold into the verdict gate. (The table shows
+Security, Potential Bugs, and Documentation rows today — the three reviewers
+wired up as of Phase 5.)
