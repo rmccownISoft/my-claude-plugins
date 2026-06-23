@@ -261,3 +261,27 @@ prompts and catch regressions as they're tuned across phases.
   2. *Eval harness (separate dev-time skill)* — build once 2–3 reviewers exist so
      it scores *any* reviewer rather than being rebuilt per reviewer. Deserves its
      own plan/ADR.
+
+### Reviewer selection via argument (run a subset)
+
+Let the invocation name a subset of reviewers so the user can run just one (or a
+few) instead of the whole squad.
+
+- **Motivation:** the full squad fans out many subagents, each of which may
+  trigger tool-permission prompts the user has to approve, plus the wait for all
+  of them to finish. Someone who only wants the Documentation lens (or just
+  Security) shouldn't have to sit through and approve the rest. A scoped run is
+  faster and quieter.
+- **Sketch:** `/isoft-pre-pr-review security` or `/isoft-pre-pr-review docs,security`
+  dispatches only those reviewers. Needs stable short names per reviewer
+  (`security`, `bugs`, `docs`, `tests`, `conventions`, `component-reuse`,
+  `case-alignment`).
+- **Disambiguation:** the arg slot already accepts an optional Jira key
+  (`PROJ-123`). Selection tokens must be told apart from a ticket key — e.g.
+  reserve the reviewer short-names, accept a `--only`/`--reviewers` flag, or
+  detect the `ABC-123` shape as the ticket and treat other tokens as reviewer
+  names. Resolve this before implementing.
+- **Verdict implication (important):** a partial run is **not** a full pre-PR
+  gate. The report header and the **Ready to hand off?** line must mark a scoped
+  run as partial, so a "docs-only → Yes" result is never mistaken for the whole
+  squad passing. Only a full run produces an authoritative handoff verdict.
