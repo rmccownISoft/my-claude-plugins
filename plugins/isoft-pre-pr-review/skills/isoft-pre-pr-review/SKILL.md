@@ -158,15 +158,31 @@ When the reviewer(s) return:
    is real, otherwise drop the finding and note in the terminal summary that a
    finding was dropped for an unverifiable location. Never write a `file:line`
    into the report that you have not confirmed.
-4. Count findings by severity (Blocker / Should-fix / Minor) across all sections.
-5. Compute the verdict:
+4. Count findings by severity (Blocker / Should-fix / Minor) **per reviewer**.
+   These counts feed the per-reviewer table in the Handoff Summary and MUST match
+   the `*N findings*` count in each section heading — if they disagree, recount;
+   the numbers may not drift.
+5. **Build the Handoff Summary by enumeration, not summarization.** This is the
+   anti-omission rule: with multiple reviewers it is tempting to mention only the
+   one or two most salient items — do not. The summary must:
+   - render the per-reviewer count **table** (a row per reviewer that ran; `n/a`
+     for a reviewer that did not run, e.g. Case Alignment without a ticket; a
+     **Total** row);
+   - under **"Must resolve before handoff"**, list **every Blocker** — copied
+     (title + location) from the sections above and tagged with its reviewer;
+   - under **"Should fix"**, list **every Should-fix**, likewise tagged.
+   The two lists must account for **every** Blocker and Should-fix in the table —
+   do not merge, rank, or drop any. Minor findings are counted in the table but
+   stay in their sections (not re-listed). An item present in a count but missing
+   from its list is a defect in the report — reconcile before writing.
+6. Compute the verdict:
    - **No** if there is **any Blocker** (later phases also: any failing test or
      eslint error).
    - **With fixes** if there are Should-fix or Minor findings but no Blocker.
    - **Yes** if nothing of substance was found.
-6. Write the report to `docs/reviews/YYYY-MM-DD-<branch>-review.md` **in the repo
+7. Write the report to `docs/reviews/YYYY-MM-DD-<branch>-review.md` **in the repo
    under review**. Create `docs/reviews/` if it does not exist. Use today's date.
-7. Print a short terminal summary: the verdict, the counts, and the report path.
+8. Print a short terminal summary: the verdict, the total counts, and the report path.
 
 ### Report shape
 
@@ -175,18 +191,35 @@ When the reviewer(s) return:
 _<N> commits, <X> files changed vs <BASE>_   ·   Ticket: <KEY or "none">
 
 ## Strengths
-- <genuine strengths, if any>
+- <genuine strengths, if any — a single merged list is fine here>
 
 ## Potential Bugs         *N findings*
 <reviewer output verbatim>
 
 ---
 ## Handoff Summary
-- Blockers: N · Should-fix: N · Minor: N
+
+| Reviewer       | Blockers | Should-fix | Minor |
+|----------------|:--------:|:----------:|:-----:|
+| Potential Bugs |    N     |     N      |   N   |
+| **Total**      |  **N**   |   **N**    | **N** |
+
+Tests: <pass/fail or skipped>  ·  ESLint: <clean/errors/skipped>
+
+### Must resolve before handoff (every Blocker — do not omit)
+1. **[<Reviewer>]** <title> — `file:line`
+   <add one line per Blocker; "None." if there are no Blockers>
+
+### Should fix
+1. **[<Reviewer>]** <title> — `file:line`
+   <add one line per Should-fix; "None." if there are none>
+
 **Ready to hand off? — Yes | With fixes | No.**
-<one line: what must be resolved first, if anything>
 ```
 
 Later phases add `## Security Issues`, `## Tests`, `## Conventions`,
 `## Documentation`, `## Component Reuse`, and (conditional) `## Case Alignment`
-sections above the Handoff Summary, plus Tests/ESLint into the verdict gate.
+sections above the Handoff Summary — each becomes its own row in the table, and
+its Blockers/Should-fix items flow into the two lists. Tests/ESLint also fold into
+the verdict gate. (The table shows a single Potential Bugs row today because that
+is the only reviewer in Phase 0.)

@@ -143,11 +143,34 @@ _<N> commits, <X> files changed vs master_   ·   Ticket: <KEY or "none">
 
 ---
 ## Handoff Summary
-- Blockers: N · Should-fix: N · Minor: N
-- Tests: <pass/fail>  ·  ESLint: <clean/errors/skipped>
+
+| Reviewer        | Blockers | Should-fix | Minor |
+|-----------------|:--------:|:----------:|:-----:|
+| Security        |    N     |     N      |   N   |
+| Potential Bugs  |    N     |     N      |   N   |
+| Conventions     |    N     |     N      |   N   |
+| Documentation   |    N     |     N      |   N   |
+| Component Reuse |    N     |     N      |   N   |
+| Case Alignment  |   n/a    |    n/a     |  n/a  |   (n/a if not run)
+| **Total**       |  **N**   |   **N**    | **N** |
+
+Tests: <pass/fail>  ·  ESLint: <clean/errors/skipped>
+
+### Must resolve before handoff (every Blocker — do not omit)
+1. **[<Reviewer>]** <title> — `file:line`
+
+### Should fix
+1. **[<Reviewer>]** <title> — `file:line`
+
 **Ready to hand off? — Yes | With fixes | No.**
-<one line: what must be resolved first, if anything>
 ```
+
+**The summary is built by enumeration, not summarization.** Every Blocker and
+every Should-fix from the sections above is re-listed (tagged by reviewer) under
+the two lists — the lists must account for every Blocker/Should-fix in the table.
+This is deliberate: a one-line "what to fix first" invites Claude to pick one or
+two items and silently drop the rest, which breaks the gate once there are
+several reviewers. Minor findings are counted in the table but not re-listed.
 
 ---
 
