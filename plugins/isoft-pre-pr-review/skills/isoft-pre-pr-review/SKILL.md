@@ -16,8 +16,9 @@ dispatches a squad of independent reviewer subagents in parallel, assembles
 their findings into one categorized report, computes a **Ready to hand off?**
 verdict, and writes the report to a file in the repo under review.
 
-> **Phase 0 (current):** one reviewer wired up — Potential Bugs. The pipeline
-> is complete end-to-end; later phases add reviewers without changing this flow.
+> **Phase 2 (current):** two reviewers wired up — Security Issues and Potential
+> Bugs. The pipeline is complete end-to-end; later phases add reviewers without
+> changing this flow.
 
 Invocation: `/isoft-pre-pr-review` or `/isoft-pre-pr-review <TICKET-KEY>`.
 (The ticket arg is accepted now but unused until the Case Alignment reviewer lands.)
@@ -112,8 +113,8 @@ Note the file count and commit count for the report header.
 ## Step 5 — Dispatch reviewers
 
 Issue all applicable reviewers as `Task` calls **in a single message** so they
-run in parallel. (Phase 0: just the Potential Bugs reviewer — but keep the
-single-message dispatch shape so adding reviewers needs no restructuring.)
+run in parallel. (Phase 2: the Security Issues and Potential Bugs reviewers —
+dispatch both in one message; adding more reviewers needs no restructuring.)
 
 For each reviewer:
 
@@ -136,7 +137,8 @@ Do NOT paste-review from this prompt — read the diff via git.
 
 ## Cross-cutting rules
 1. No refactor suggestions — concrete defects only.
-2. Every finding needs file:line, what's wrong, why it matters, and a repro.
+2. Every finding needs file:line, what's wrong, why it matters, and concrete
+   evidence (a repro for bugs, a source→sink exploit path for security).
 3. Scope to the diff; read surrounding code only to confirm a finding.
 4. Ignore lockfiles, dist/, build/, node_modules/, images, generated manifests.
 ```
@@ -193,6 +195,9 @@ _<N> commits, <X> files changed vs <BASE>_   ·   Ticket: <KEY or "none">
 ## Strengths
 - <genuine strengths, if any — a single merged list is fine here>
 
+## Security Issues        *N findings*
+<reviewer output verbatim>
+
 ## Potential Bugs         *N findings*
 <reviewer output verbatim>
 
@@ -201,6 +206,7 @@ _<N> commits, <X> files changed vs <BASE>_   ·   Ticket: <KEY or "none">
 
 | Reviewer       | Blockers | Should-fix | Minor |
 |----------------|:--------:|:----------:|:-----:|
+| Security       |    N     |     N      |   N   |
 | Potential Bugs |    N     |     N      |   N   |
 | **Total**      |  **N**   |   **N**    | **N** |
 
@@ -217,9 +223,9 @@ Tests: <pass/fail or skipped>  ·  ESLint: <clean/errors/skipped>
 **Ready to hand off? — Yes | With fixes | No.**
 ```
 
-Later phases add `## Security Issues`, `## Tests`, `## Conventions`,
-`## Documentation`, `## Component Reuse`, and (conditional) `## Case Alignment`
-sections above the Handoff Summary — each becomes its own row in the table, and
-its Blockers/Should-fix items flow into the two lists. Tests/ESLint also fold into
-the verdict gate. (The table shows a single Potential Bugs row today because that
-is the only reviewer in Phase 0.)
+Later phases add `## Tests`, `## Conventions`, `## Documentation`,
+`## Component Reuse`, and (conditional) `## Case Alignment` sections above the
+Handoff Summary — each becomes its own row in the table, and its
+Blockers/Should-fix items flow into the two lists. Tests/ESLint also fold into
+the verdict gate. (The table shows Security and Potential Bugs rows today because
+those are the two reviewers wired up in Phase 2.)
