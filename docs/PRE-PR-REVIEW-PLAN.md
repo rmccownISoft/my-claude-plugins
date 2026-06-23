@@ -92,8 +92,11 @@ Invocation: `/pre-pr-review` or `/pre-pr-review <TICKET-KEY>`.
 2. **Pre-gather context** (via `!`-prefixed bash, executed once and shared with reviewers):
    - branch name, diff stat vs `master`, commit one-liners, untracked files
    - every `CLAUDE.md` path in the repo
-   - **eslint**: detect a config, run it on the changed files, capture results; if no
-     config or it errors, record "lint not configured / skipped" rather than guessing
+   - **eslint**: detect a config, run it on the changed files, capture results. If
+     **no config exists**, do not guess a default and do not record a benign "skipped"
+     — stop and flag the missing config as a problem/finding (see Phase 3 note;
+     ISoft recommends/may require a shared TS+Svelte config). If a config exists but
+     the run itself errors, record that error.
 3. **Scope detection** — auto-proceed on the normal feature-branch-vs-`master` case;
    ask the user to choose when ambiguous (on `master` with uncommitted work,
    untracked-only, feature branch with extra scratch). Apply the exclusions above.
@@ -198,6 +201,17 @@ Do **not** batch-generate all reviewers at once.
 - **Phase 3 — Tests reviewer + eslint in the orchestrator.** ⏳ Deferred. Wire up
   changed-area test execution and the lint step; fold both into the verdict gate.
   (Until this lands, the report shows Tests/ESLint as "skipped".)
+  - **Lint-config presence is itself a check.** Before running lint, detect whether
+    *any* lint config exists for the project. If none does, **do not** fall back to
+    a default ruleset or silently skip — stop the lint step there and report the
+    missing config as a **problem/finding**, not a benign "skipped". ISoft has
+    company-specific lint configs; we **recommend** (and may in future **require**)
+    our shared config for TypeScript and Svelte projects, so an absent config is a
+    real gap worth surfacing in the report. (This supersedes the earlier
+    "record 'lint not configured / skipped'" wording in the Orchestrator flow
+    section above — missing config is a flagged problem, not a quiet skip.)
+    Open sub-question: severity of a missing lint config (Should-fix vs Minor),
+    and whether to name/point at the ISoft shared config in the finding.
 - **Phase 4 — Conventions reviewer.** ⏳ Deferred. (reads CLAUDE.md)
 - **Phase 5 — Documentation reviewer.** ✅ Done (pulled forward ahead of Phases 3–4).
   Caps at Should-fix — documentation never flips the verdict to "No". Concerns:
