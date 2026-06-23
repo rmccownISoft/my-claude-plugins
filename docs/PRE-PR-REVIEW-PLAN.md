@@ -299,3 +299,34 @@ few) instead of the whole squad.
   gate. The report header and the **Ready to hand off?** line must mark a scoped
   run as partial, so a "docs-only → Yes" result is never mistaken for the whole
   squad passing. Only a full run produces an authoritative handoff verdict.
+
+### Capture user-flagged recommendations / common misses (feedback loop)
+
+Give users a way to flag a recommendation or a commonly-missed PR item as a
+"recommended change" so it can be reused on future reviews — the **input** side of
+the knowledge the Phase 8 Codex MCP is meant to **serve** to reviewers.
+
+- **Motivation:** when a reviewer (human or this skill) keeps catching the same
+  class of miss, or a user knows a team convention the squad doesn't yet check,
+  there should be a low-friction way to record it once and have it inform later
+  runs — rather than re-explaining it on every PR.
+- **Open question — the sink (undecided):** where does a flagged recommendation
+  go? Candidates:
+  1. **GitHub issue** — visible, native to the PR workflow, but not structured for
+     re-ingestion by the reviewers.
+  2. **Jira ticket** — fits the existing case-alignment/ticketing flow, same
+     re-ingestion caveat.
+  3. **Committed to the Codex project** (the Phase 8 ISoft MCP serving PR
+     conventions/gotchas/preferences) — this is the natural home if the goal is to
+     *feed it back into reviews*, since that's exactly what Codex is for. The other
+     two are better for human tracking than for closing the loop.
+  Decide based on whether the primary goal is human visibility (issue/ticket) or
+  machine reuse by the reviewers (Codex). These aren't mutually exclusive — a flag
+  could open a ticket *and* land in Codex.
+- **Ties to Phase 8.** This is the authoring/contribution counterpart to the
+  Codex consumption hook (SKILL Step 5). Worth designing the two together so the
+  format captured here is the format the reviewers can later read.
+- **Scope guard:** keep it consistent with the no-refactor gate — a captured
+  "recommended change" should be a concrete convention/gotcha/defect pattern, not
+  a style preference, or it will reintroduce the nitpicking the gate exists to
+  prevent.
