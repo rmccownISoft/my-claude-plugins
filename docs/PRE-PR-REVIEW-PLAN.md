@@ -182,16 +182,27 @@ present the full prompt for line-by-line review, explain the rationale for any
 non-obvious line, get approval, let the user test and tweak, commit, then move on.
 Do **not** batch-generate all reviewers at once.
 
-- **Phase 0 — Foundation.** `plugin.json` + a minimal `SKILL.md` that gathers context,
-  detects scope, dispatches a *single* reviewer, and writes the report file. Run
-  `pnpm run sync`. Goal: prove the end-to-end pipeline on one reviewer.
-- **Phase 1 — Potential Bugs reviewer.** The highest-value lens; tune it against real
-  ISoft diffs.
-- **Phase 2 — Security reviewer.**
-- **Phase 3 — Tests reviewer + eslint in the orchestrator.** Wire up changed-area test
-  execution and the lint step; fold both into the verdict gate.
-- **Phase 4 — Conventions reviewer.** (reads CLAUDE.md)
-- **Phase 5 — Documentation reviewer.**
+> **Progress (as of 2026-06-23):** Phases 0–2 and 5 are done and wired into the
+> orchestrator (Potential Bugs, Security, Documentation reviewers). Phases 3–4
+> were deliberately deferred ahead of a demo and remain to be built. Build order
+> below was not followed strictly — Documentation (5) was pulled forward as a
+> low-risk win. The skill stays shippable at each step regardless of order.
+
+- **Phase 0 — Foundation.** ✅ Done. `plugin.json` + a minimal `SKILL.md` that gathers
+  context, detects scope, dispatches a *single* reviewer, and writes the report file.
+  Run `pnpm run sync`. Goal: prove the end-to-end pipeline on one reviewer.
+- **Phase 1 — Potential Bugs reviewer.** ✅ Done. The highest-value lens; tune it
+  against real ISoft diffs.
+- **Phase 2 — Security reviewer.** ✅ Done. Source→sink discipline; confirmed-exploit
+  findings are Blockers, plausible-but-unconfirmed cap at Should-fix.
+- **Phase 3 — Tests reviewer + eslint in the orchestrator.** ⏳ Deferred. Wire up
+  changed-area test execution and the lint step; fold both into the verdict gate.
+  (Until this lands, the report shows Tests/ESLint as "skipped".)
+- **Phase 4 — Conventions reviewer.** ⏳ Deferred. (reads CLAUDE.md)
+- **Phase 5 — Documentation reviewer.** ✅ Done (pulled forward ahead of Phases 3–4).
+  Caps at Should-fix — documentation never flips the verdict to "No". Concerns:
+  missing Svelte prop docs, missing test-run docs, stale docs after a fix/feature,
+  incorrect new docs, and (nice-to-have) unannotated new graphql/api endpoints.
 - **Phase 6 — Component Reuse reviewer.** (Svelte MCP)
 - **Phase 7 — Case Alignment reviewer.** (Jira, conditional)
 - **Phase 8 — Codex MCP forward hook** + final verdict-gate polish.
@@ -202,11 +213,20 @@ At each phase the skill stays shippable: it just has fewer reviewers.
 
 ## Getting started (next session)
 
-1. Confirm the plugin name (`pre-pr-review`) and slash-command ergonomics.
-2. Do **Phase 0** only: scaffold `plugin.json` + minimal `SKILL.md` (single-reviewer
-   pipeline) + `reviewers/bugs.md`. Run `pnpm run sync`.
-3. Test on a branch with real changes; review the bugs reviewer line by line; tweak.
-4. Commit, then proceed to Phase 1's tuning / Phase 2.
+Phases 0–2 and 5 are built (Potential Bugs, Security, Documentation). Pick up the
+deferred work:
+
+1. **Phase 3 — Tests + eslint in the orchestrator.** This is the highest-value gap:
+   it's the only remaining piece that folds into the verdict gate (a failing test or
+   eslint error flips "Ready to hand off?" to **No**). Wire changed-area test
+   execution and the lint step into `SKILL.md`, replacing the current
+   "skipped (not wired until Phase 3)" placeholders in the report.
+2. **Phase 4 — Conventions reviewer** (reads every CLAUDE.md; cite a quoted rule or
+   3+ existing examples).
+3. Then Phases 6–8 (Component Reuse, Case Alignment, Codex hook).
+
+Per the collaboration protocol: build one reviewer at a time, present the full
+prompt for line-by-line review, get approval, test on a real branch, commit.
 
 ---
 
