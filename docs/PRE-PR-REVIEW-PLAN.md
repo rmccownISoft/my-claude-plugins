@@ -40,7 +40,8 @@ ISoft-specific reviewers and rules.
 | Verdict | **Ready to hand off?** = **No** if any Blocker OR failing test OR eslint error; else With fixes / Yes |
 | Jira ticket | Inferred from branch name; `/pre-pr-review PROJ-123` arg overrides; reviewer skipped if no key |
 | Jira reviewer gating | Runs only if a key exists **and** the Jira MCP is installed for that user |
-| Tests | Run only changed-area tests (tests touching changed files), report pass/fail, suggest more |
+| Tests | Run documented test command(s) + changed-area tests, report pass/fail (failing in-scope test = Blocker → "No"), suggest more |
+| Lint & Format | ESLint **and** Prettier on changed files only, counts only; both cap at Should-fix, missing config is a Should-fix finding |
 | Codex MCP | Forward-compatible, availability-gated hook only — no-op today; do not hard-depend |
 
 ---
@@ -185,11 +186,12 @@ present the full prompt for line-by-line review, explain the rationale for any
 non-obvious line, get approval, let the user test and tweak, commit, then move on.
 Do **not** batch-generate all reviewers at once.
 
-> **Progress (as of 2026-06-23):** Phases 0–2 and 5 are done and wired into the
-> orchestrator (Potential Bugs, Security, Documentation reviewers). Phases 3–4
-> were deliberately deferred ahead of a demo and remain to be built. Build order
-> below was not followed strictly — Documentation (5) was pulled forward as a
-> low-risk win. The skill stays shippable at each step regardless of order.
+> **Progress (as of 2026-06-23):** Phases 0–3 and 5 are done and wired into the
+> orchestrator (Potential Bugs, Security, Tests, Documentation, Lint & Format
+> reviewers). Phase 4 (Conventions) remains. Build order below was not followed
+> strictly — Documentation (5) was pulled forward as a low-risk win, then Phase 3
+> was squeezed in ahead of a demo. The skill stays shippable at each step
+> regardless of order.
 
 - **Phase 0 — Foundation.** ✅ Done. `plugin.json` + a minimal `SKILL.md` that gathers
   context, detects scope, dispatches a *single* reviewer, and writes the report file.
@@ -198,20 +200,26 @@ Do **not** batch-generate all reviewers at once.
   against real ISoft diffs.
 - **Phase 2 — Security reviewer.** ✅ Done. Source→sink discipline; confirmed-exploit
   findings are Blockers, plausible-but-unconfirmed cap at Should-fix.
-- **Phase 3 — Tests reviewer + eslint in the orchestrator.** ⏳ Deferred. Wire up
-  changed-area test execution and the lint step; fold both into the verdict gate.
-  (Until this lands, the report shows Tests/ESLint as "skipped".)
-  - **Lint-config presence is itself a check.** Before running lint, detect whether
-    *any* lint config exists for the project. If none does, **do not** fall back to
-    a default ruleset or silently skip — stop the lint step there and report the
-    missing config as a **problem/finding**, not a benign "skipped". ISoft has
-    company-specific lint configs; we **recommend** (and may in future **require**)
-    our shared config for TypeScript and Svelte projects, so an absent config is a
-    real gap worth surfacing in the report. (This supersedes the earlier
-    "record 'lint not configured / skipped'" wording in the Orchestrator flow
-    section above — missing config is a flagged problem, not a quiet skip.)
-    Open sub-question: severity of a missing lint config (Should-fix vs Minor),
-    and whether to name/point at the ISoft shared config in the finding.
+- **Phase 3 — Tests reviewer + Lint & Format reviewer.** ✅ Done. Two new
+  reviewers: `tests.md` runs the documented test command(s) (package.json
+  scripts + README) and/or the changed-area tests, reports pass/fail, and flags
+  uncovered changed paths; `lint-format.md` runs ESLint **and** Prettier on the
+  changed files. **Resolved decisions** (deviating from the original wording above):
+  - **Lint/format is a *subagent*, not orchestrator bash.** Done as a reviewer so
+    raw tool output stays in the subagent's context and only a concise summary
+    returns — same context-hygiene reason the rest of the squad is subagents.
+  - **Prettier included** alongside ESLint (user has both as `@isoftdata` repos).
+  - **Both cap at Should-fix; neither flips the verdict to "No".** Most ISoft
+    projects aren't fully linted yet, so lint/format is advisory, not a gate. The
+    only gate inputs are a Blocker or a **failing in-scope test** (modeled as a
+    Blocker in `tests.md`).
+  - **Lint-config presence is itself a check.** No config → a **Should-fix**
+    finding naming the package to install (`@isoftdata/eslint-config-{base,
+    typescript,svelte}`, `@isoftdata/prettier-config{,-base}`) — not a silent skip.
+  - **Changed files only**, never project-wide (avoids burying the change's signal
+    under pre-existing un-linted noise).
+  - **Counts only, no per-error listing** in the report — whether it ran + clean
+    vs N errors; raw error lists are noise the user doesn't want.
 - **Phase 4 — Conventions reviewer.** ⏳ Deferred. (reads CLAUDE.md)
 - **Phase 5 — Documentation reviewer.** ✅ Done (pulled forward ahead of Phases 3–4).
   Caps at Should-fix — documentation never flips the verdict to "No". Concerns:
@@ -227,17 +235,12 @@ At each phase the skill stays shippable: it just has fewer reviewers.
 
 ## Getting started (next session)
 
-Phases 0–2 and 5 are built (Potential Bugs, Security, Documentation). Pick up the
-deferred work:
+Phases 0–3 and 5 are built (Potential Bugs, Security, Tests, Documentation, Lint
+& Format). Pick up the remaining work:
 
-1. **Phase 3 — Tests + eslint in the orchestrator.** This is the highest-value gap:
-   it's the only remaining piece that folds into the verdict gate (a failing test or
-   eslint error flips "Ready to hand off?" to **No**). Wire changed-area test
-   execution and the lint step into `SKILL.md`, replacing the current
-   "skipped (not wired until Phase 3)" placeholders in the report.
-2. **Phase 4 — Conventions reviewer** (reads every CLAUDE.md; cite a quoted rule or
+1. **Phase 4 — Conventions reviewer** (reads every CLAUDE.md; cite a quoted rule or
    3+ existing examples).
-3. Then Phases 6–8 (Component Reuse, Case Alignment, Codex hook).
+2. Then Phases 6–8 (Component Reuse, Case Alignment, Codex hook).
 
 Per the collaboration protocol: build one reviewer at a time, present the full
 prompt for line-by-line review, get approval, test on a real branch, commit.

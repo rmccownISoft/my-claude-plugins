@@ -16,10 +16,11 @@ dispatches a squad of independent reviewer subagents in parallel, assembles
 their findings into one categorized report, computes a **Ready to hand off?**
 verdict, and writes the report to a file in the repo under review.
 
-> **Phase 5 (current):** three reviewers wired up — Security Issues, Potential
-> Bugs, and Documentation. (Phases 3–4, Tests and Conventions, are not yet built.)
-> The pipeline is complete end-to-end; later phases add reviewers without
-> changing this flow.
+> **Phase 3 (current):** five reviewers wired up — Security Issues, Potential
+> Bugs, Tests, Documentation, and Lint & Format. (Phase 4, Conventions, is not
+> yet built.) Tests and Lint & Format fold into the verdict: a failing in-scope
+> test flips it to "No"; ESLint/Prettier issues cap at Should-fix. The pipeline
+> is complete end-to-end; later phases add reviewers without changing this flow.
 
 Invocation: `/isoft-pre-pr-review` or `/isoft-pre-pr-review <TICKET-KEY>`.
 (The ticket arg is accepted now but unused until the Case Alignment reviewer lands.)
@@ -114,16 +115,23 @@ Note the file count and commit count for the report header.
 ## Step 5 — Dispatch reviewers
 
 Issue all applicable reviewers as `Task` calls **in a single message** so they
-run in parallel. (Phase 5: the Security Issues, Potential Bugs, and Documentation
-reviewers — dispatch all three in one message; adding more reviewers needs no
-restructuring.)
+run in parallel. (Phase 3: Security Issues, Potential Bugs, Tests, Documentation,
+and Lint & Format — dispatch all five in one message; adding more reviewers needs
+no restructuring.)
 
 For each reviewer:
 
-- `subagent_type`: `general-purpose` (reviewers need full read/grep access)
+- `subagent_type`: `general-purpose` (reviewers need full read/grep access; the
+  Tests and Lint & Format reviewers also run commands via Bash — `general-purpose`
+  already has it)
 - `description`: the reviewer's short name (e.g. "Potential Bugs review")
 - `prompt`: the contents of the reviewer file under `reviewers/`, with the
   **shared context block** below prepended.
+
+The Tests (`reviewers/tests.md`) and Lint & Format (`reviewers/lint-format.md`)
+reviewers run tools in their own subagent context and return only a concise
+section — raw test/lint output never reaches this orchestrator. Both scope their
+runs to the changed files only.
 
 Shared context block to prepend (fill in from the steps above):
 
@@ -180,8 +188,9 @@ When the reviewer(s) return:
    stay in their sections (not re-listed). An item present in a count but missing
    from its list is a defect in the report — reconcile before writing.
 6. Compute the verdict:
-   - **No** if there is **any Blocker** (later phases also: any failing test or
-     eslint error).
+   - **No** if there is **any Blocker**. A failing in-scope test is a Blocker
+     (the Tests reviewer reports it as one), so a failing test flips the verdict
+     to No. ESLint and Prettier issues are **Should-fix** and never flip it to No.
    - **With fixes** if there are Should-fix or Minor findings but no Blocker.
    - **Yes** if nothing of substance was found.
 7. Write the report to `docs/reviews/YYYY-MM-DD-<branch>-review.md` **in the repo
@@ -203,20 +212,28 @@ _<N> commits, <X> files changed vs <BASE>_   ·   Ticket: <KEY or "none">
 ## Potential Bugs         *N findings*
 <reviewer output verbatim>
 
+## Tests                  *N findings*
+<reviewer output verbatim>
+
 ## Documentation          *N findings*
+<reviewer output verbatim>
+
+## Lint & Format          *N findings*
 <reviewer output verbatim>
 
 ---
 ## Handoff Summary
 
-| Reviewer       | Blockers | Should-fix | Minor |
-|----------------|:--------:|:----------:|:-----:|
-| Security       |    N     |     N      |   N   |
-| Potential Bugs |    N     |     N      |   N   |
-| Documentation  |   n/a    |     N      |   N   |
-| **Total**      |  **N**   |   **N**    | **N** |
+| Reviewer        | Blockers | Should-fix | Minor |
+|-----------------|:--------:|:----------:|:-----:|
+| Security        |    N     |     N      |   N   |
+| Potential Bugs  |    N     |     N      |   N   |
+| Tests           |    N     |     N      |   N   |
+| Documentation   |   n/a    |     N      |   N   |
+| Lint & Format   |   n/a    |     N      |   N   |
+| **Total**       |  **N**   |   **N**    | **N** |
 
-Tests: <pass/fail or skipped>  ·  ESLint: <clean/errors/skipped>
+Tests: <pass | fail | none | could-not-run>  ·  ESLint: <clean | N errors | no config | could-not-run>  ·  Prettier: <clean | N files | no config | could-not-run>
 
 ### Must resolve before handoff (every Blocker — do not omit)
 1. **[<Reviewer>]** <title> — `file:line`
@@ -229,14 +246,20 @@ Tests: <pass/fail or skipped>  ·  ESLint: <clean/errors/skipped>
 **Ready to hand off? — Yes | With fixes | No.**
 ```
 
-The Documentation row shows `n/a` in the Blockers column on purpose: the
-Documentation reviewer caps at Should-fix and can never produce a Blocker, so it
-cannot flip the verdict to "No". Its Should-fix/Minor items still flow into the
-lists and the Total.
+The Documentation and Lint & Format rows show `n/a` in the Blockers column on
+purpose: both cap at Should-fix and can never produce a Blocker, so neither can
+flip the verdict to "No". Their Should-fix/Minor items still flow into the lists
+and the Total. The Tests row, by contrast, **can** carry a Blocker — a failing
+in-scope test — which is what flips the verdict to "No".
 
-Later phases add `## Tests`, `## Conventions`, `## Component Reuse`, and
-(conditional) `## Case Alignment` sections above the Handoff Summary — each
-becomes its own row in the table, and its Blockers/Should-fix items flow into the
-two lists. Tests/ESLint also fold into the verdict gate. (The table shows
-Security, Potential Bugs, and Documentation rows today — the three reviewers
-wired up as of Phase 5.)
+Build the `Tests: … · ESLint: … · Prettier: …` status line from the reviewer
+outputs, not by re-running anything: take `Tests:` from the Tests reviewer's
+**Result** line (pass if it passed, fail if any in-scope test failed,
+could-not-run if it couldn't run, none if no tests), and `ESLint:`/`Prettier:`
+from the Lint & Format reviewer's **ESLint:**/**Prettier:** lines.
+
+Later phases add `## Conventions`, `## Component Reuse`, and (conditional)
+`## Case Alignment` sections above the Handoff Summary — each becomes its own row
+in the table, and its Blockers/Should-fix items flow into the two lists. (The
+table shows Security, Potential Bugs, Tests, Documentation, and Lint & Format
+rows today — the five reviewers wired up as of Phase 3.)
