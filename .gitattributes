@@ -1,0 +1,4 @@
+# Normalize all text files to LF in the repository.
+# This overrides a global core.autocrlf=true, which otherwise checks files
+# out with CRLF on Windows and conflicts with Prettier's LF output.
+* text=auto eol=lf
