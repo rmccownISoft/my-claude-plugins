@@ -1,6 +1,6 @@
 ---
 name: vault
-description: Save a learning note to the personal-learning-vault repo. Trigger when the user says "Vault: <topic> — <context>", invokes /vault, says "vault this", or a close variant — from any project. Writes a new doc and updates the index without asking for confirmation when the topic and context are clear.
+description: 'Save a learning note to the personal-learning-vault repo. Trigger when the user says "Vault: <topic> — <context>", invokes /vault, says "vault this", or a close variant — from any project. Writes a new doc and updates the index without asking for confirmation when the topic and context are clear.'
 ---
 
 # Vault

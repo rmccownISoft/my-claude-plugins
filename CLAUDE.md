@@ -15,5 +15,7 @@
   Prefer single quotes (matches Prettier `singleQuote: true`); inner double
   quotes need no escaping, and a literal apostrophe is written `''`.
 
-- Verify before opening a PR: `node scripts/check-skill-descriptions.mjs`
+- Verify before opening a PR: `pnpm check` (or `node scripts/check-skill-descriptions.mjs`)
+- This is enforced automatically by a pre-commit hook and CI — setup and reuse
+  notes in [docs/enforce-skill-descriptions.md](docs/enforce-skill-descriptions.md)
 - Rationale: [docs/adr/0002-skill-descriptions-single-line-scalar.md](docs/adr/0002-skill-descriptions-single-line-scalar.md)
