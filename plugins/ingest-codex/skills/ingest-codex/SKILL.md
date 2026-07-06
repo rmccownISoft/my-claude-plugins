@@ -1,12 +1,6 @@
 ---
 name: ingest-codex
-description: >
-  Ingests an iSoftData Svelte component into the Codex knowledge bank. Run this from inside
-  a component repo with the component name as the argument (e.g. /ingest-codex DataTable).
-  Reads source files directly — no prompt bundling needed — follows TypeScript imports to
-  resolve exact prop types, and writes the Codex entry JSON to the sibling isoft-memory-experiment
-  repo. Use when the user says "ingest <ComponentName>", "/ingest-codex <ComponentName>",
-  or "add <ComponentName> to the codex".
+description: 'Ingests an iSoftData Svelte component into the Codex knowledge bank. Run this from inside a component repo with the component name as the argument (e.g. /ingest-codex DataTable). Reads source files directly — no prompt bundling needed — follows TypeScript imports to resolve exact prop types, and writes the Codex entry JSON to the sibling isoft-memory-experiment repo. Use when the user says "ingest <ComponentName>", "/ingest-codex <ComponentName>", or "add <ComponentName> to the codex".'
 ---
 
 # Codex Component Ingestion

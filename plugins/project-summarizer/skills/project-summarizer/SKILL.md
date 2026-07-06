@@ -1,14 +1,6 @@
 ---
 name: project-summarizer
-description: >
-  Creates and incrementally updates a PROJECT.md file that gives Claude or any LLM instant
-  orientation to a codebase — without needing to reconstruct project understanding from scratch
-  each session. Use this skill whenever the user asks to "summarize the project", "update the
-  project docs", "document this codebase", "create a PROJECT.md", or says things like "catch
-  you up on my project", "help me document where things live", or "I want a map of this repo".
-  Also trigger when the user describes a new feature, bug fix, or architectural change and the
-  conversation implies the PROJECT.md should be kept current. Primarily designed for
-  JavaScript/TypeScript projects but the core structure applies to any code project.
+description: 'Creates and incrementally updates a PROJECT.md file that gives Claude or any LLM instant orientation to a codebase — without needing to reconstruct project understanding from scratch each session. Use this skill whenever the user asks to "summarize the project", "update the project docs", "document this codebase", "create a PROJECT.md", or says things like "catch you up on my project", "help me document where things live", or "I want a map of this repo". Also trigger when the user describes a new feature, bug fix, or architectural change and the conversation implies the PROJECT.md should be kept current. Primarily designed for JavaScript/TypeScript projects but the core structure applies to any code project.'
 ---
 
 # Project Summarizer
