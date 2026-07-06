@@ -1,6 +1,6 @@
 ---
 name: quick-plan
-description: Use when the user has rough or loosely organized thoughts about what to build next and wants to move directly to an implementation plan without a full brainstorming session, spec document, or design review.
+description: 'Use when the user has rough or loosely organized thoughts about what to build next and wants to move directly to an implementation plan without a full brainstorming session, spec document, or design review.'
 ---
 
 # Quick Plan

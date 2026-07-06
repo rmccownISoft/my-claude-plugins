@@ -1,0 +1,24 @@
+#!/bin/sh
+# Pre-commit gate: reject SKILL.md descriptions that aren't single-line scalars.
+# Enabled per-clone via `git config core.hooksPath .githooks`, which the
+# package.json "prepare" script runs automatically on `pnpm install`.
+#
+# See docs/enforce-skill-descriptions.md for the full rationale and how to
+# reuse this in another repo.
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "pre-commit: node not found on PATH; skipping SKILL.md description check." >&2
+  exit 0
+fi
+
+node scripts/check-skill-descriptions.mjs
+status=$?
+
+if [ "$status" -ne 0 ]; then
+  echo >&2
+  echo "pre-commit: SKILL.md description check failed (see above)." >&2
+  echo "Fix the flagged descriptions to a single-line quoted scalar, then re-commit." >&2
+  echo "Bypass in an emergency with: git commit --no-verify" >&2
+fi
+
+exit "$status"

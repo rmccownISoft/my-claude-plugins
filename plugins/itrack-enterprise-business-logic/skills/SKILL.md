@@ -1,6 +1,6 @@
 ---
 name: itrack-enterprise-business-logic
-description: "Use for any question involving ITrack Enterprise — data, business logic, calculations, reporting, how-to questions, or system architecture. Trigger on: sales orders, purchasing, work orders, labor efficiency, GL, AR, inventory, locations, warehouse management, vehicle teardown, cost pools, cores, Custom Fields, profit, COGS, AR aging, unpulled parts, bin locations, picking, shipping, variance, average cost, Q&A fields, any ITrack calculation, feature questions, permissions, or changelog."
+description: 'Use for any question involving ITrack Enterprise — data, business logic, calculations, reporting, how-to questions, or system architecture. Trigger on: sales orders, purchasing, work orders, labor efficiency, GL, AR, inventory, locations, warehouse management, vehicle teardown, cost pools, cores, Custom Fields, profit, COGS, AR aging, unpulled parts, bin locations, picking, shipping, variance, average cost, Q&A fields, any ITrack calculation, feature questions, permissions, or changelog.'
 metadata:
   author: ISoft Data Systems, Inc.
   version: 2.0.0
