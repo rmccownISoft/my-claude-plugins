@@ -1,0 +1,9 @@
+{
+  "name": "study-later",
+  "version": "0.1.0",
+  "description": "Capture learning topics mid-work with full project context, then get tutored through them later via checkpoint-based lessons in the study-later vault repo.",
+  "author": {
+    "name": "Personal"
+  },
+  "keywords": ["learning", "tutoring", "adhd", "knowledge-capture"]
+}

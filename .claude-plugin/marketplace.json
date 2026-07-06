@@ -85,6 +85,21 @@
       ]
     },
     {
+      "name": "study-later",
+      "source": "./plugins/study-later",
+      "description": "Capture learning topics mid-work with full project context, then get tutored through them later via checkpoint-based lessons in the study-later vault repo.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Personal"
+      },
+      "keywords": [
+        "learning",
+        "tutoring",
+        "adhd",
+        "knowledge-capture"
+      ]
+    },
+    {
       "name": "vault",
       "source": "./plugins/vault",
       "description": "Save a learning note to the personal-learning-vault repo when the user flags a topic with the 'Vault:' trigger, regardless of which project they're currently in.",
