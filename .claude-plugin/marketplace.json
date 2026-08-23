@@ -6,6 +6,23 @@
   },
   "plugins": [
     {
+      "name": "explain-my-way",
+      "source": "./plugins/explain-my-way",
+      "description": "Primes Claude to explain concepts the way this user actually learns (trace execution over time, one concrete example anchored to their own code, predict-the-output exercises one at a time) instead of static prose or 'read the docs'. Also holds ready-to-use scripts for explaining the user's learning style to coworkers.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Robert McCown",
+        "email": "robertmccown2@gmail.com"
+      },
+      "keywords": [
+        "learning",
+        "communication",
+        "adhd",
+        "visual-spatial",
+        "self-advocacy"
+      ]
+    },
+    {
       "name": "file-save-sound",
       "source": "./plugins/file-save-sound",
       "description": "Plays a system sound whenever Claude writes or edits a file.",
@@ -67,6 +84,22 @@
         "planning",
         "documentation",
         "project-structure"
+      ]
+    },
+    {
+      "name": "quick-learn-concept",
+      "source": "./plugins/quick-learn-concept",
+      "description": "Produces a short (~10 minute), hands-on teaching doc for ONE JavaScript/Node/project concept you hit while working, anchored to the current repo's real code. The lightweight counterpart to study-later: a quick single-sitting grasp of one thing, not a multi-session course.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Robert McCown",
+        "email": "robertmccown2@gmail.com"
+      },
+      "keywords": [
+        "learning",
+        "tutoring",
+        "javascript",
+        "onboarding"
       ]
     },
     {

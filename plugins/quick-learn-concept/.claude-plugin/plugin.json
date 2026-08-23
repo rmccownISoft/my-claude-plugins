@@ -1,0 +1,15 @@
+{
+    "name": "quick-learn-concept",
+    "version": "0.1.0",
+    "description": "Produces a short (~10 minute), hands-on teaching doc for ONE JavaScript/Node/project concept you hit while working, anchored to the current repo's real code. The lightweight counterpart to study-later: a quick single-sitting grasp of one thing, not a multi-session course.",
+    "author": {
+        "name": "Robert McCown",
+        "email": "robertmccown2@gmail.com"
+    },
+    "keywords": [
+        "learning",
+        "tutoring",
+        "javascript",
+        "onboarding"
+    ]
+}

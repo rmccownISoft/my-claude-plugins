@@ -1,0 +1,16 @@
+{
+    "name": "explain-my-way",
+    "version": "0.1.0",
+    "description": "Primes Claude to explain concepts the way this user actually learns (trace execution over time, one concrete example anchored to their own code, predict-the-output exercises one at a time) instead of static prose or 'read the docs'. Also holds ready-to-use scripts for explaining the user's learning style to coworkers.",
+    "author": {
+        "name": "Robert McCown",
+        "email": "robertmccown2@gmail.com"
+    },
+    "keywords": [
+        "learning",
+        "communication",
+        "adhd",
+        "visual-spatial",
+        "self-advocacy"
+    ]
+}
