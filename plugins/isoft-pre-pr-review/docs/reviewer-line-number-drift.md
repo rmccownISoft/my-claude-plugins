@@ -82,5 +82,3 @@ drift becomes impossible. Bigger change (touches all five reviewer prompts *and*
 - `plugins/isoft-pre-pr-review/skills/isoft-pre-pr-review/reviewers/bugs.md`
 - `plugins/isoft-pre-pr-review/skills/isoft-pre-pr-review/reviewers/tests.md`
 - `plugins/isoft-pre-pr-review/skills/isoft-pre-pr-review/reviewers/documentation.md`
-- `plugins/isoft-pre-pr-review/skills/isoft-pre-pr-review/reviewers/lint-format.md` (no
-  file:line citations — unaffected)
