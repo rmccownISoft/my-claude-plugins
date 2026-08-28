@@ -1,6 +1,6 @@
 ---
 name: isoft-pre-pr-review
-description: 'Manual pre-PR review for ISoft branches. Dispatches independent reviewer subagents in parallel against the branch diff and writes one categorized report ending in a clear "Ready to hand off?" verdict. Run it on your branch BEFORE opening a PR to catch the mistakes a human reviewer would. User-invocable only.'
+description: 'Manual pre-PR review for ISoft branches. Dispatches independent reviewer subagents in parallel against the branch diff and writes one categorized report ending in a clear "Ready to hand off?" verdict. When run against a live PR in the GitHub Action, it also posts the actionable findings as inline review comments on the diff. Run it on your branch BEFORE opening a PR to catch the mistakes a human reviewer would. User-invocable only.'
 disable-model-invocation: true
 ---
 
@@ -9,13 +9,18 @@ disable-model-invocation: true
 Run this on a feature branch before opening a PR. It gathers the branch diff,
 dispatches a squad of independent reviewer subagents in parallel, assembles
 their findings into one categorized report, computes a **Ready to hand off?**
-verdict, and writes the report to a file in the repo under review.
+verdict, and writes the report to a file in the repo under review. When it runs
+against a live pull request (inside the GitHub Action), it also posts each
+actionable finding as an inline review comment on the diff line it concerns, and
+the Handoff Summary as one top-level PR comment.
 
-> **Phase 3 (current):** five reviewers wired up — Security Issues, Potential
-> Bugs, Tests, Documentation, and Lint & Format. (Phase 4, Conventions, is not
-> yet built.) Tests and Lint & Format fold into the verdict: a failing in-scope
-> test flips it to "No"; ESLint/Prettier issues cap at Should-fix. The pipeline
-> is complete end-to-end; later phases add reviewers without changing this flow.
+> **Phase 3 (current):** four reviewers wired up — Security Issues, Potential
+> Bugs, Tests, and Documentation. (Phase 4, Conventions, is not yet built.)
+> All four are read-only analysis; none runs the test suite (that is enforced by
+> the repo's pre-commit hooks and CI). Only Security and Potential Bugs can raise
+> a Blocker and flip the verdict to "No"; Tests and Documentation cap at
+> Should-fix. The pipeline is complete end-to-end; later phases add reviewers
+> without changing this flow.
 
 Invocation: `/isoft-pre-pr-review` or `/isoft-pre-pr-review <TICKET-KEY>`.
 (The ticket arg is accepted now but unused until the Case Alignment reviewer lands.)
@@ -26,7 +31,7 @@ These are prepended to every reviewer prompt. They are the reason this review
 is a gate and not nitpicking:
 
 1. **No refactor suggestions.** A finding must be a concrete defect: a bug with
-   a repro, an exploit path, a missing/wrong doc, a missing/failing test, or a
+   a repro, an exploit path, a missing/wrong doc, an uncovered changed code path, or a
    violation of a written CLAUDE.md rule or established repo pattern.
    "Could be cleaner / more idiomatic / extract a helper / DRY this up" is **not**
    a finding and is dropped at both the reviewer and assembly stages.
@@ -110,23 +115,21 @@ Note the file count and commit count for the report header.
 ## Step 5 — Dispatch reviewers
 
 Issue all applicable reviewers as `Task` calls **in a single message** so they
-run in parallel. (Phase 3: Security Issues, Potential Bugs, Tests, Documentation,
-and Lint & Format — dispatch all five in one message; adding more reviewers needs
+run in parallel. (Phase 3: Security Issues, Potential Bugs, Tests, and
+Documentation — dispatch all four in one message; adding more reviewers needs
 no restructuring.)
 
 For each reviewer:
 
-- `subagent_type`: `general-purpose` (reviewers need full read/grep access; the
-  Tests and Lint & Format reviewers also run commands via Bash — `general-purpose`
-  already has it)
+- `subagent_type`: `general-purpose` (reviewers need full read/grep access)
 - `description`: the reviewer's short name (e.g. "Potential Bugs review")
 - `prompt`: the contents of the reviewer file under `reviewers/`, with the
   **shared context block** below prepended.
 
-The Tests (`reviewers/tests.md`) and Lint & Format (`reviewers/lint-format.md`)
-reviewers run tools in their own subagent context and return only a concise
-section — raw test/lint output never reaches this orchestrator. Both scope their
-runs to the changed files only.
+Every reviewer is read-only static analysis — it reads the diff and greps the
+repo, and returns only a concise section. No reviewer runs the test suite or any
+build command; test pass/fail is enforced by the repo's pre-commit hooks and CI,
+not here.
 
 Shared context block to prepend (fill in from the steps above):
 
@@ -183,14 +186,65 @@ When the reviewer(s) return:
    stay in their sections (not re-listed). An item present in a count but missing
    from its list is a defect in the report — reconcile before writing.
 6. Compute the verdict:
-   - **No** if there is **any Blocker**. A failing in-scope test is a Blocker
-     (the Tests reviewer reports it as one), so a failing test flips the verdict
-     to No. ESLint and Prettier issues are **Should-fix** and never flip it to No.
+   - **No** if there is **any Blocker**. Only Security and Potential Bugs can
+     raise a Blocker; Tests and Documentation cap at Should-fix and never flip
+     the verdict to No.
    - **With fixes** if there are Should-fix or Minor findings but no Blocker.
    - **Yes** if nothing of substance was found.
 7. Write the report to `docs/reviews/YYYY-MM-DD-<branch>-review.md` **in the repo
    under review**. Create `docs/reviews/` if it does not exist. Use today's date.
-8. Print a short terminal summary: the verdict, the total counts, and the report path.
+8. **Post PR comments — only when reviewing a live pull request.** The tool
+   `mcp__github_inline_comment__create_inline_comment` is provided by the Claude
+   Code GitHub Action and exists **only** in a `pull_request` context; use its
+   presence as the signal that this is a live PR run. If it is not available (a
+   local `/isoft-pre-pr-review` run, or a non-PR trigger), **skip this whole step
+   silently** — the file report from step 7 is the whole output, exactly as
+   before, and nothing is posted to any PR.
+
+   When it **is** available, do two things: **(a)** post each actionable finding
+   as an inline comment, then **(b)** post the Handoff Summary as one top-level
+   PR comment. The Action does NOT post any summary for you — if the skill does
+   not post it, a run with no inline findings leaves nothing visible on the PR.
+
+   **(a) Inline findings.** Post **every Blocker and every Should-fix**; leave
+   Minor findings in the file report only, to keep PR noise down. Post each with
+   the MCP tool — never with `gh`, which cannot reliably anchor a comment to a
+   diff line. For each finding call the tool once with:
+   - `path` — the finding's file, repo-relative (e.g. `src/foo.ts`).
+   - `line` — the line you **already confirmed in step 3**. For a multi-line
+     finding, also pass `startLine` (the range start; `line` is the end).
+   - `side` — `RIGHT` for an added or changed line (the usual case, since
+     findings are scoped to the diff). Use `LEFT` only when the finding is about
+     a line the diff **removed**.
+   - `body` — lead with `**[<Severity>] [<Reviewer>]**`, then what's wrong and
+     why it matters, then the concrete repro (bugs) or source→sink path
+     (security). Write only what the human needs to act. Do **not** include a
+     ```` ```suggestion ```` block unless it is a complete, drop-in replacement
+     for exactly that line range — a partial suggestion the author cannot
+     click-to-commit is worse than a plain comment.
+
+   Anchoring rule: only anchor to a line that is part of the diff. Step 3 already
+   confirmed the location is in the changed set, but a confirmed line can still
+   be diff **context** (unchanged surrounding code) rather than an added/removed
+   line — GitHub rejects an inline comment on a context line. If that happens, do
+   not force it inline: leave that finding in the file report and the Handoff
+   Summary and move on. Never fail the whole run over one rejected comment.
+
+   **(b) The Handoff Summary comment.** The summary and verdict are not tied to
+   any single line, so they cannot be inline — post them as one top-level PR
+   comment with the `gh` CLI:
+   - Find the PR number. On a `pull_request` event the env var `GITHUB_REF` is
+     `refs/pull/<N>/merge` — take `<N>`. If that is empty, try
+     `gh pr view --json number -q .number`.
+   - Write **just** the Handoff Summary (the table, the two lists, and the
+     **Ready to hand off?** line) to a temporary file, then post it:
+     `gh pr comment <N> --body-file <tmpfile>`. Post the summary only, not the
+     whole report — the full report stays in the file from step 7.
+   - The Action sets `GITHUB_TOKEN` in this environment to the Claude GitHub App
+     installation token, so `gh` authenticates on its own and the comment posts
+     as `claude[bot]`. If `gh` is missing or the PR number cannot be resolved,
+     skip this quietly — do not fail the run over it.
+9. Print a short terminal summary: the verdict, the total counts, and the report path.
 
 ### Report shape
 
@@ -213,9 +267,6 @@ _<N> commits, <X> files changed vs <BASE>_   ·   Ticket: <KEY or "none">
 ## Documentation          *N findings*
 <reviewer output verbatim>
 
-## Lint & Format          *N findings*
-<reviewer output verbatim>
-
 ---
 ## Handoff Summary
 
@@ -223,12 +274,9 @@ _<N> commits, <X> files changed vs <BASE>_   ·   Ticket: <KEY or "none">
 |-----------------|:--------:|:----------:|:-----:|
 | Security        |    N     |     N      |   N   |
 | Potential Bugs  |    N     |     N      |   N   |
-| Tests           |    N     |     N      |   N   |
+| Tests           |   n/a    |     N      |   N   |
 | Documentation   |   n/a    |     N      |   N   |
-| Lint & Format   |   n/a    |     N      |   N   |
 | **Total**       |  **N**   |   **N**    | **N** |
-
-Tests: <pass | fail | none | could-not-run>  ·  ESLint: <clean | N errors | no config | could-not-run>  ·  Prettier: <clean | N files | no config | could-not-run>
 
 ### Must resolve before handoff (every Blocker — do not omit)
 1. **[<Reviewer>]** <title> — `file:line`
@@ -241,20 +289,14 @@ Tests: <pass | fail | none | could-not-run>  ·  ESLint: <clean | N errors | no 
 **Ready to hand off? — Yes | With fixes | No.**
 ```
 
-The Documentation and Lint & Format rows show `n/a` in the Blockers column on
-purpose: both cap at Should-fix and can never produce a Blocker, so neither can
-flip the verdict to "No". Their Should-fix/Minor items still flow into the lists
-and the Total. The Tests row, by contrast, **can** carry a Blocker — a failing
-in-scope test — which is what flips the verdict to "No".
-
-Build the `Tests: … · ESLint: … · Prettier: …` status line from the reviewer
-outputs, not by re-running anything: take `Tests:` from the Tests reviewer's
-**Result** line (pass if it passed, fail if any in-scope test failed,
-could-not-run if it couldn't run, none if no tests), and `ESLint:`/`Prettier:`
-from the Lint & Format reviewer's **ESLint:**/**Prettier:** lines.
+The Tests and Documentation rows show `n/a` in the Blockers column on purpose:
+both are read-only analysis that caps at Should-fix and can never produce a
+Blocker, so neither can flip the verdict to "No". Their Should-fix/Minor items
+still flow into the lists and the Total. Only the Security and Potential Bugs
+rows can carry a Blocker — which is what flips the verdict to "No".
 
 Later phases add `## Conventions`, `## Component Reuse`, and (conditional)
 `## Case Alignment` sections above the Handoff Summary — each becomes its own row
 in the table, and its Blockers/Should-fix items flow into the two lists. (The
-table shows Security, Potential Bugs, Tests, Documentation, and Lint & Format
-rows today — the five reviewers wired up as of Phase 3.)
+table shows Security, Potential Bugs, Tests, and Documentation rows today — the
+four reviewers wired up as of Phase 3.)
