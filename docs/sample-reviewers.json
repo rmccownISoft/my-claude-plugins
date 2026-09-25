@@ -1,0 +1,64 @@
+[
+  {
+    "reviewer": "security",
+    "status": "ran",
+    "findings": [],
+    "strengths": ["Parameterizes the new SQL query instead of interpolating."]
+  },
+  {
+    "reviewer": "bugs",
+    "status": "ran",
+    "findings": [
+      {
+        "severity": "should-fix",
+        "title": "Empty catch swallows the parse error",
+        "file": "src/parse.ts",
+        "line": 2,
+        "what": "A malformed payload is silently treated as an empty object.",
+        "evidence": "Send `{` — JSON.parse throws, the catch returns {}, caller sees no error.",
+        "fix": "Rethrow or surface the parse failure."
+      }
+    ]
+  },
+  {
+    "reviewer": "tests",
+    "status": "ran",
+    "tests": { "ran": "vitest run src/parse.test.ts", "result": "3 passed, 1 failed", "status": "fail" },
+    "findings": [
+      {
+        "severity": "blocker",
+        "title": "parse() rejects valid trailing-newline input",
+        "file": "src/parse.test.ts",
+        "line": 1,
+        "type": "Failing test",
+        "what": "In-scope test fails against the changed parser.",
+        "evidence": "AssertionError: expected {a:1} to deeply equal {}"
+      }
+    ]
+  },
+  {
+    "reviewer": "documentation",
+    "status": "ran",
+    "findings": [
+      {
+        "severity": "minor",
+        "title": "README still documents the removed --legacy flag",
+        "file": "README.md",
+        "line": 3,
+        "what": "The flag was deleted in this diff but the docs still list it."
+      }
+    ]
+  },
+  {
+    "reviewer": "lint-format",
+    "status": "ran",
+    "lint": { "eslint": "clean", "prettier": "clean" },
+    "findings": []
+  },
+  {
+    "reviewer": "conventions",
+    "status": "could-not-run",
+    "couldNotRunReason": "Codex corpus is empty (run `npm run rebuild`).",
+    "findings": []
+  }
+]

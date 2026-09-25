@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://isoftdata.com/pre-pr-review/reviewer-output.schema.json",
+  "title": "Pre-PR Review — reviewer output",
+  "description": "The structured result ONE reviewer subagent returns. assemble.mjs consumes an array of these (one per reviewer that was dispatched) and derives all counts, the verdict, and the rendered report from them. This is the keystone contract: once findings are data instead of prose, counting/omission/verdict stop being things the orchestrator has to get right by hand. NOTE: as of the script-extraction branch the reviewer prompts still emit markdown; converting each one to emit an object matching this schema is Phase 2.",
+  "type": "object",
+  "required": ["reviewer", "status", "findings"],
+  "additionalProperties": false,
+  "properties": {
+    "reviewer": {
+      "description": "Which reviewer produced this. Must match a key assemble.mjs knows (drives section order + whether the reviewer can carry a Blocker).",
+      "enum": ["security", "bugs", "tests", "documentation", "lint-format", "conventions"]
+    },
+    "status": {
+      "description": "Did the reviewer actually run? A reviewer that errored/timed out/lacked a dependency is 'could-not-run' — never synthesize findings for it.",
+      "enum": ["ran", "could-not-run"]
+    },
+    "couldNotRunReason": {
+      "description": "Required when status is could-not-run; the one-line reason shown in the report (e.g. 'Codex corpus is empty (run npm run rebuild)').",
+      "type": ["string", "null"]
+    },
+    "findings": {
+      "description": "Every finding this reviewer is confident in. Empty array when the reviewer ran clean.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/finding" }
+    },
+    "strengths": {
+      "description": "Optional one-liners the reviewer chose to note. The orchestrator merges these into the report's Strengths section; it never authors its own.",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "notes": {
+      "description": "Free-text degradation/troubleshooting notes surfaced verbatim under the reviewer's section (e.g. Conventions' 'reviewed against global scope only' note). Not findings; they never affect counts or the verdict.",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "tests": {
+      "description": "Tests reviewer only — feeds the status line. Omit for other reviewers.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ran": { "type": "string", "description": "The command(s) actually run, or why none." },
+        "result": { "type": "string", "description": "Human summary, e.g. '12 passed, 1 failed'." },
+        "status": { "enum": ["pass", "fail", "none", "could-not-run"] }
+      }
+    },
+    "lint": {
+      "description": "Lint & Format reviewer only — feeds the status line. Omit for other reviewers.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eslint": { "type": "string", "description": "e.g. 'clean' | '3 errors' | 'no config' | 'could-not-run'" },
+        "prettier": { "type": "string", "description": "e.g. 'clean' | '2 files' | 'no config' | 'could-not-run'" }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "could-not-run" } } },
+      "then": {
+        "required": ["couldNotRunReason"],
+        "properties": { "findings": { "maxItems": 0 } }
+      }
+    }
+  ],
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "required": ["severity", "title", "what"],
+      "additionalProperties": false,
+      "properties": {
+        "severity": {
+          "description": "Blocker flips the verdict to 'No' (only reviewers that can carry a Blocker — see assemble.mjs REVIEWER_META). Should-fix and Minor never flip it.",
+          "enum": ["blocker", "should-fix", "minor"]
+        },
+        "title": { "type": "string", "description": "Short label for the summary lists." },
+        "file": {
+          "description": "Repo-relative path. NEVER absolute. Null only when the reviewer could not pin a file (rare) and is relying on a snippet.",
+          "type": ["string", "null"]
+        },
+        "line": {
+          "description": "1-based line the finding anchors to, or null when the exact line is unknown (then snippet must be set). assemble.mjs verifies this resolves.",
+          "type": ["integer", "null"],
+          "minimum": 1
+        },
+        "snippet": {
+          "description": "The offending code, quoted, so the location is recoverable when line is null or drifts.",
+          "type": ["string", "null"]
+        },
+        "what": { "type": "string", "description": "What is wrong, in plain English." },
+        "evidence": {
+          "description": "Concrete backing: a repro for a bug, a source->sink path for security, runner output for a failing test.",
+          "type": ["string", "null"]
+        },
+        "fix": {
+          "description": "Optional one-line fix direction. NOT a refactor and never a rewrite.",
+          "type": ["string", "null"]
+        },
+        "entryId": {
+          "description": "Conventions reviewer only: the codex standard id this violates. Every Conventions finding MUST set it; other reviewers leave it null.",
+          "type": ["string", "null"]
+        },
+        "standardSeverity": {
+          "description": "Conventions reviewer only: the cited entry's own severity (drives Blocker vs Should-fix).",
+          "enum": ["blocking", "advisory", null]
+        },
+        "type": {
+          "description": "Tests reviewer only: 'Failing test' | 'Uncovered change' | 'Could-not-run' | 'Pre-existing failure'.",
+          "type": ["string", "null"]
+        },
+        "deleted": {
+          "description": "True when the cited code was DELETED by the diff — assemble.mjs then resolves file:line against BASE (git show BASE:path) instead of the working tree.",
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "anyOf": [
+        { "required": ["file"], "properties": { "file": { "type": "string" } } },
+        { "required": ["snippet"], "properties": { "snippet": { "type": "string" } } }
+      ]
+    }
+  }
+}
