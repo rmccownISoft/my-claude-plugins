@@ -116,6 +116,60 @@ resolves the mode once, up front:
   same reviewers and scripts. **Do this merge only after the approach is proven in
   this repo.**
 
+### 4.4 The reviewer output schema (keystone, next-step 1)
+
+**What:** a JSON Schema file. It defines the exact shape of the data that **one
+reviewer** hands back to the orchestrator. Today reviewers return markdown (see the
+"Output (markdown, no preamble)" block at the end of org `reviewers/bugs.md`).
+
+**Why it comes first:** every script downstream reads it.
+
+```
+reviewers ──(JSON matching schema)──► assemble ──► deliver
+                     ▲
+      also the format of every eval fixture (§6, §9 step 2)
+```
+
+- A script can't reliably parse model-written markdown (`**Severity:** Blocker
+  (confirmed)`, a missing Location line…). The schema makes the handoff checkable.
+- Invalid output fails loudly at validation, instead of silently producing a wrong
+  count.
+- It doesn't make reviewers find better bugs. Judgment stays in the prompts.
+
+**How to build it:**
+
+1. Work backward from consumers. Every field must be read by something (see the
+   table below). Leave out anything nobody reads.
+2. Write it as JSON Schema draft 2020-12. Use `enum` for any value a script
+   branches on (`severity`, `status`). Use `required`, and
+   `additionalProperties: false` so typos are rejected.
+3. Validate in `assemble` (likely with `ajv`, so the schema file stays the single
+   source of truth).
+4. Replace each reviewer's markdown "Output" block with the JSON shape plus one
+   example. If output is invalid, retry once with the validator error, then mark
+   the reviewer `could-not-run`.
+5. Hand-write the drift-test fixtures as instances of the schema. The schema and
+   fixtures get built together.
+
+| Consumer needs | Field(s) |
+|---|---|
+| Section order; can this reviewer block? | `reviewer` (enum) |
+| `n/a` row for a reviewer that didn't run | `status`, `couldNotRunReason` |
+| Counts + verdict | `findings[].severity` (enum) |
+| Summary lists | `findings[].title` |
+| Citation check; GitHub inline comments | `findings[].file`, `line`, `snippet` (fallback) |
+| Report body | `findings[].what`, `evidence`, `fix` |
+| Status line | `tests.status`, `lint.eslint`, `lint.prettier` |
+| Strengths section | `strengths[]` |
+
+**Decisions still open about the draft**
+([reviewer-output.schema.json](reviewer-output.schema.json)):
+
+- Reviewer-specific fields (`entryId`, `standardSeverity`, Tests `type`) sit on
+  every finding. Keep one flat shape, or split into per-reviewer extensions?
+- "Documentation / Lint can't block" lives in `assemble.mjs`, not the schema.
+  Enforce it in one place only, and pick which.
+
 ---
 
 ## 5. Scope
