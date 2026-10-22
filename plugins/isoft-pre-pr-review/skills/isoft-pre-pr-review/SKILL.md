@@ -202,9 +202,12 @@ When the reviewer(s) return:
    before, and nothing is posted to any PR.
 
    When it **is** available, do two things: **(a)** post each actionable finding
-   as an inline comment, then **(b)** post the Handoff Summary as one top-level
-   PR comment. The Action does NOT post any summary for you — if the skill does
-   not post it, a run with no inline findings leaves nothing visible on the PR.
+   as an inline comment (there may be none), then **(b)** post the Handoff Summary
+   as one top-level PR comment — **always, including when (a) posted nothing and
+   the verdict is "Yes" with zero findings.** The Action posts no summary for you,
+   so the Handoff Summary comment is the one guaranteed sign that the review ran;
+   a clean PR must still get it. (a) is conditional on there being findings to
+   post; (b) is not — never skip it just because nothing was flagged.
 
    **(a) Inline findings.** Post **every Blocker and every Should-fix**; leave
    Minor findings in the file report only, to keep PR noise down. Post each with
@@ -230,9 +233,14 @@ When the reviewer(s) return:
    not force it inline: leave that finding in the file report and the Handoff
    Summary and move on. Never fail the whole run over one rejected comment.
 
-   **(b) The Handoff Summary comment.** The summary and verdict are not tied to
-   any single line, so they cannot be inline — post them as one top-level PR
-   comment with the `gh` CLI:
+   **(b) The Handoff Summary comment — always posted in a live PR run.** Post it
+   whatever the verdict (No, With fixes, or Yes) and whether or not (a) posted any
+   inline comment: a zero-finding review still posts its summary so the PR visibly
+   shows the review ran and came back clean. For a **Yes** verdict with no
+   findings, lead the comment with a single line — `✅ No findings — ready to hand
+   off.` — above the (all-zero) table; the two lists then read `None.` as usual.
+   The summary and verdict are not tied to any single line, so they cannot be
+   inline — post them as one top-level PR comment with the `gh` CLI:
    - Find the PR number. On a `pull_request` event the env var `GITHUB_REF` is
      `refs/pull/<N>/merge` — take `<N>`. If that is empty, try
      `gh pr view --json number -q .number`.
