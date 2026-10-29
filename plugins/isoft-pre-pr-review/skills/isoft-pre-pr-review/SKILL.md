@@ -181,10 +181,10 @@ When the reviewer(s) return:
    - under **"Must resolve before handoff"**, list **every Blocker** — copied
      (title + location) from the sections above and tagged with its reviewer;
    - under **"Should fix"**, list **every Should-fix**, likewise tagged.
-   The two lists must account for **every** Blocker and Should-fix in the table —
-   do not merge, rank, or drop any. Minor findings are counted in the table but
-   stay in their sections (not re-listed). An item present in a count but missing
-   from its list is a defect in the report — reconcile before writing.
+     The two lists must account for **every** Blocker and Should-fix in the table —
+     do not merge, rank, or drop any. Minor findings are counted in the table but
+     stay in their sections (not re-listed). An item present in a count but missing
+     from its list is a defect in the report — reconcile before writing.
 6. Compute the verdict:
    - **No** if there is **any Blocker**. Only Security and Potential Bugs can
      raise a Blocker; Tests and Documentation cap at Should-fix and never flip
@@ -222,7 +222,7 @@ When the reviewer(s) return:
    - `body` — lead with `**[<Severity>] [<Reviewer>]**`, then what's wrong and
      why it matters, then the concrete repro (bugs) or source→sink path
      (security). Write only what the human needs to act. Do **not** include a
-     ```` ```suggestion ```` block unless it is a complete, drop-in replacement
+     ` ```suggestion ` block unless it is a complete, drop-in replacement
      for exactly that line range — a partial suggestion the author cannot
      click-to-commit is worse than a plain comment.
 
@@ -238,7 +238,7 @@ When the reviewer(s) return:
    inline comment: a zero-finding review still posts its summary so the PR visibly
    shows the review ran and came back clean. For a **Yes** verdict with no
    findings, lead the comment with a single line — `✅ No findings — ready to hand
-   off.` — above the (all-zero) table; the two lists then read `None.` as usual.
+off.` — above the (all-zero) table; the two lists then read `None.` as usual.
    The summary and verdict are not tied to any single line, so they cannot be
    inline — post them as one top-level PR comment with the `gh` CLI:
    - Find the PR number. On a `pull_request` event the env var `GITHUB_REF` is
@@ -252,45 +252,55 @@ When the reviewer(s) return:
      installation token, so `gh` authenticates on its own and the comment posts
      as `claude[bot]`. If `gh` is missing or the PR number cannot be resolved,
      skip this quietly — do not fail the run over it.
+
 9. Print a short terminal summary: the verdict, the total counts, and the report path.
 
 ### Report shape
 
 ```markdown
 # Pre-PR Review — <branch>
-_<N> commits, <X> files changed vs <BASE>_   ·   Ticket: <KEY or "none">
+
+_<N> commits, <X> files changed vs <BASE>_ · Ticket: <KEY or "none">
 
 ## Strengths
+
 - <genuine strengths, if any — a single merged list is fine here>
 
-## Security Issues        *N findings*
+## Security Issues _N findings_
+
 <reviewer output verbatim>
 
-## Potential Bugs         *N findings*
+## Potential Bugs _N findings_
+
 <reviewer output verbatim>
 
-## Tests                  *N findings*
+## Tests _N findings_
+
 <reviewer output verbatim>
 
-## Documentation          *N findings*
+## Documentation _N findings_
+
 <reviewer output verbatim>
 
 ---
+
 ## Handoff Summary
 
-| Reviewer        | Blockers | Should-fix | Minor |
-|-----------------|:--------:|:----------:|:-----:|
-| Security        |    N     |     N      |   N   |
-| Potential Bugs  |    N     |     N      |   N   |
-| Tests           |   n/a    |     N      |   N   |
-| Documentation   |   n/a    |     N      |   N   |
-| **Total**       |  **N**   |   **N**    | **N** |
+| Reviewer       | Blockers | Should-fix | Minor |
+| -------------- | :------: | :--------: | :---: |
+| Security       |    N     |     N      |   N   |
+| Potential Bugs |    N     |     N      |   N   |
+| Tests          |   n/a    |     N      |   N   |
+| Documentation  |   n/a    |     N      |   N   |
+| **Total**      |  **N**   |   **N**    | **N** |
 
 ### Must resolve before handoff (every Blocker — do not omit)
+
 1. **[<Reviewer>]** <title> — `file:line`
    <add one line per Blocker; "None." if there are no Blockers>
 
 ### Should fix
+
 1. **[<Reviewer>]** <title> — `file:line`
    <add one line per Should-fix; "None." if there are none>
 
