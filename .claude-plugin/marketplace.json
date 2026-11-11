@@ -6,6 +6,21 @@
   },
   "plugins": [
     {
+      "name": "change-summary",
+      "source": "./plugins/change-summary",
+      "description": "Summarizes code changes file by file in plain English, compared against a related plan doc if one exists. For reviewing changes you didn't write yourself, such as work Claude did.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Robert McCown",
+        "email": "rmccown@isoftdata.com"
+      },
+      "keywords": [
+        "code-review",
+        "summary",
+        "git"
+      ]
+    },
+    {
       "name": "explain-my-way",
       "source": "./plugins/explain-my-way",
       "description": "Primes Claude to explain concepts the way this user actually learns (trace execution over time, one concrete example anchored to their own code, predict-the-output exercises one at a time) instead of static prose or 'read the docs'. Also holds ready-to-use scripts for explaining the user's learning style to coworkers.",
