@@ -11,7 +11,7 @@ _5 commits, 8 files changed vs master_   ·   Ticket: none
 
 ### 1. Base-branch resolution treats a failed `origin/HEAD` lookup as success
 **Severity:** Should-fix
-**Location:** `plugins/isoft-pre-pr-review/skills/isoft-pre-pr-review/SKILL.md` — Step 1 & Step 2 rule 1
+**Location:** `plugins/bobs-pr-review/skills/bobs-pr-review/SKILL.md` — Step 1 & Step 2 rule 1
 **What breaks:** `git rev-parse --abbrev-ref origin/HEAD` does not cleanly fail when
 `origin/HEAD` is unset — it exits non-zero **and prints the literal string
 `origin/HEAD` to stdout** (verified in this repo: exit 128, stdout = `origin/HEAD`).
@@ -26,7 +26,7 @@ the literal `origin/HEAD` before accepting it as BASE.
 
 ### 2. Empty-scope message can fire on a populated branch when base resolution is off
 **Severity:** Minor
-**Location:** `plugins/isoft-pre-pr-review/skills/isoft-pre-pr-review/SKILL.md` — Step 3
+**Location:** `plugins/bobs-pr-review/skills/bobs-pr-review/SKILL.md` — Step 3
 **What breaks:** Combined with finding #1, a mis-resolved base makes
 `BASE...HEAD` empty, so Step 3 reports "No changes to review" even when committed
 changes exist. Largely intended behavior under ADR-0001, but a sanity cross-check

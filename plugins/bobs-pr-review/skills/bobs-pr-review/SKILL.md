@@ -1,12 +1,13 @@
 ---
-name: isoft-pre-pr-review
-description: 'Manual pre-PR review for ISoft branches. Dispatches independent reviewer subagents in parallel against the branch diff and writes one categorized report ending in a clear "Ready to hand off?" verdict. When run against a live PR in the GitHub Action, it also posts the actionable findings as inline review comments on the diff. Run it on your branch BEFORE opening a PR to catch the mistakes a human reviewer would. User-invocable only.'
+name: bobs-pr-review
+description: 'Manual code review squad for ISoft branches. Dispatches independent reviewer subagents in parallel against the committed branch diff and writes one categorized report ending in a clear "Ready to hand off?" verdict. Run it on your branch before opening a PR, or against a live PR in the GitHub Action where it also posts the actionable findings as inline review comments on the diff. Catches the mistakes a human reviewer would. User-invocable only.'
 disable-model-invocation: true
 ---
 
-# ISoft Pre-PR Review
+# Bobs PR Review
 
-Run this on a feature branch before opening a PR. It gathers the branch diff,
+Run this on a feature branch — before opening a PR, or on a live PR via the
+GitHub Action. It gathers the branch diff,
 dispatches a squad of independent reviewer subagents in parallel, assembles
 their findings into one categorized report, computes a **Ready to hand off?**
 verdict, and writes the report to a file in the repo under review. When it runs
@@ -22,7 +23,7 @@ the Handoff Summary as one top-level PR comment.
 > Should-fix. The pipeline is complete end-to-end; later phases add reviewers
 > without changing this flow.
 
-Invocation: `/isoft-pre-pr-review` or `/isoft-pre-pr-review <TICKET-KEY>`.
+Invocation: `/bobs-pr-review` or `/bobs-pr-review <TICKET-KEY>`.
 (The ticket arg is accepted now but unused until the Case Alignment reviewer lands.)
 
 ## Cross-cutting rules (every reviewer must obey)
@@ -76,9 +77,9 @@ Record the resolved base; every diff below uses it. Let `BASE` denote it.
 
 ## Step 3 — Detect scope (committed work only)
 
-This is a **pre-PR** review, so the unit of review is the **committed branch diff
-vs `BASE`** — exactly what the PR will contain. Uncommitted and untracked changes
-are **not** reviewed; they won't be in the PR. This is a deliberate decision —
+The unit of review is the **committed branch diff vs `BASE`** — exactly what the
+PR contains. Uncommitted and untracked changes are **not** reviewed; they won't
+be in the PR. This is a deliberate decision —
 see [ADR-0001](../../../../docs/adr/0001-pre-pr-review-committed-only-scope.md).
 
 Gather:
@@ -197,7 +198,7 @@ When the reviewer(s) return:
    `mcp__github_inline_comment__create_inline_comment` is provided by the Claude
    Code GitHub Action and exists **only** in a `pull_request` context; use its
    presence as the signal that this is a live PR run. If it is not available (a
-   local `/isoft-pre-pr-review` run, or a non-PR trigger), **skip this whole step
+   local `/bobs-pr-review` run, or a non-PR trigger), **skip this whole step
    silently** — the file report from step 7 is the whole output, exactly as
    before, and nothing is posted to any PR.
 
@@ -258,7 +259,7 @@ off.` — above the (all-zero) table; the two lists then read `None.` as usual.
 ### Report shape
 
 ```markdown
-# Pre-PR Review — <branch>
+# Bobs PR Review — <branch>
 
 _<N> commits, <X> files changed vs <BASE>_ · Ticket: <KEY or "none">
 

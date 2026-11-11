@@ -249,7 +249,7 @@ prompt for line-by-line review, get approval, test on a real branch, commit.
 
 ## Open questions
 
-- [x] Final plugin/skill name and whether to namespace it — **`isoft-pre-pr-review`** (namespaced).
+- [x] Final plugin/skill name and whether to namespace it — **`bobs-pr-review`** (namespaced).
 - [x] Is `master` always the base, or detect the default branch? — **detect** (`origin/HEAD` → local `main`/`master` fallback → ask; see SKILL Step 2).
 - [ ] Exact `docs/reviews/` location — always in the reviewed repo, or configurable?
 - [ ] Which Jira project keys are in use (for branch-name parsing)?
@@ -289,7 +289,7 @@ few) instead of the whole squad.
   of them to finish. Someone who only wants the Documentation lens (or just
   Security) shouldn't have to sit through and approve the rest. A scoped run is
   faster and quieter.
-- **Sketch:** `/isoft-pre-pr-review security` or `/isoft-pre-pr-review docs,security`
+- **Sketch:** `/bobs-pr-review security` or `/bobs-pr-review docs,security`
   dispatches only those reviewers. Needs stable short names per reviewer
   (`security`, `bugs`, `docs`, `tests`, `conventions`, `component-reuse`,
   `case-alignment`).

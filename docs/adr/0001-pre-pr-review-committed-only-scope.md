@@ -2,12 +2,12 @@
 
 - **Status:** Accepted
 - **Date:** 2026-06-16
-- **Component:** `plugins/isoft-pre-pr-review`
+- **Component:** `plugins/bobs-pr-review`
 - **Related:** [PRE-PR-REVIEW-PLAN.md](../PRE-PR-REVIEW-PLAN.md)
 
 ## Context
 
-The `isoft-pre-pr-review` skill was seeded from `squad-review`, which detects
+The `bobs-pr-review` skill was seeded from `squad-review`, which detects
 three possible review scopes — committed branch diff, uncommitted tracked
 changes, and untracked files — and, when more than one is present, prompts the
 user with a menu to choose which to review.
@@ -48,5 +48,5 @@ The multi-scope selection menu inherited from `squad-review` is removed.
   ad-hoc/uncommitted review. We accept this — pre-PR review and WIP review are
   different jobs.
 - **Reversible:** if demand appears, an explicit opt-in flag (e.g.
-  `/isoft-pre-pr-review --include-uncommitted`) could re-enable WIP scope without
+  `/bobs-pr-review --include-uncommitted`) could re-enable WIP scope without
   changing the default. Not built now (YAGNI).
