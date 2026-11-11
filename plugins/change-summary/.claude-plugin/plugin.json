@@ -1,0 +1,14 @@
+{
+    "name": "change-summary",
+    "version": "0.1.0",
+    "description": "Summarizes code changes file by file in plain English, compared against a related plan doc if one exists. For reviewing changes you didn't write yourself, such as work Claude did.",
+    "author": {
+        "name": "Robert McCown",
+        "email": "rmccown@isoftdata.com"
+    },
+    "keywords": [
+        "code-review",
+        "summary",
+        "git"
+    ]
+}
