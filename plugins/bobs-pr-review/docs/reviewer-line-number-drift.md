@@ -1,6 +1,6 @@
 # Reviewer line-number drift — findings & recommendations
 
-_Context: first real run of `isoft-pre-pr-review` (against `enterprise-api` @ `oauth-support`,
+_Context: first real run of `bobs-pr-review` (against `enterprise-api` @ `oauth-support`,
 2026-06-24). The reviewers found genuine issues, but four cited `file:line` locations were
 wrong. The assembly-stage validation (SKILL.md step 6.3) caught and corrected all four before
 they reached the report, so the gate held — but the underlying cause is worth fixing in the
@@ -76,9 +76,9 @@ drift becomes impossible. Bigger change (touches all five reviewer prompts *and*
 
 ## Files involved
 
-- `plugins/isoft-pre-pr-review/skills/isoft-pre-pr-review/SKILL.md` — cross-cutting rules block
+- `plugins/bobs-pr-review/skills/bobs-pr-review/SKILL.md` — cross-cutting rules block
   (rule 2, "Evidence required") and step 6.3 (location validation)
-- `plugins/isoft-pre-pr-review/skills/isoft-pre-pr-review/reviewers/security.md`
-- `plugins/isoft-pre-pr-review/skills/isoft-pre-pr-review/reviewers/bugs.md`
-- `plugins/isoft-pre-pr-review/skills/isoft-pre-pr-review/reviewers/tests.md`
-- `plugins/isoft-pre-pr-review/skills/isoft-pre-pr-review/reviewers/documentation.md`
+- `plugins/bobs-pr-review/skills/bobs-pr-review/reviewers/security.md`
+- `plugins/bobs-pr-review/skills/bobs-pr-review/reviewers/bugs.md`
+- `plugins/bobs-pr-review/skills/bobs-pr-review/reviewers/tests.md`
+- `plugins/bobs-pr-review/skills/bobs-pr-review/reviewers/documentation.md`

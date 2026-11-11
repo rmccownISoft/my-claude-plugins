@@ -1,0 +1,15 @@
+{
+    "name": "bobs-pr-review",
+    "version": "0.2.0",
+    "description": "Manual code review squad. Fans out independent reviewer subagents against the committed branch diff and writes one categorized report ending in a Ready-to-hand-off verdict. Run it on your branch before opening a PR, or in a GitHub Action on a live PR where it also posts findings as inline review comments and the summary as a top-level comment.",
+    "author": {
+        "name": "Robert McCown",
+        "email": "rmccown@isoftdata.com"
+    },
+    "keywords": [
+        "code-review",
+        "pr-review",
+        "isoft",
+        "quality-gate"
+    ]
+}
