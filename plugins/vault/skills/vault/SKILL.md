@@ -1,11 +1,11 @@
 ---
 name: vault
-description: 'Add anything to the user''s Obsidian vault (tasks, learning notes, summaries, handoffs) from any project, or show their board. Trigger on "Vault: <topic> — <context>", /vault, "vault this", "add to my vault", "add to my inbox", "put this on my board", "summarize this into my vault", "write a handoff to my vault", "what''s on my board", "what''s in Now", or a close variant. Not for a generic "remember this" with no mention of the vault.'
+description: 'The user''s one task system for everything (ISoft work, Makeshift, Tool Library, personal, AI, learning): add tasks, ideas, learning notes, summaries, and handoffs to their Obsidian vault and board from any project, or show what''s on the board. Trigger on "Vault: <topic> — <context>", /vault, "vault this", "add to my vault", "add to my inbox", "put this on my board", "summarize this into my vault", "write a handoff to my vault", "what''s on my board", "what''s in Now", or a close variant. Not for a generic "remember this" with no mention of the vault.'
 ---
 
 # Vault
 
-The user keeps one Obsidian vault for everything: a kanban board of tasks across their life buckets, an inbox, learning notes, and handoffs. This skill works from any project; the current working directory is irrelevant.
+The user tracks everything in one Obsidian vault: ISoft work, Makeshift (the makerspace), Tool Library (the nonprofit web app), personal, and AI tasks on one kanban board, plus an inbox, learning notes, and handoffs. This skill works from any project; the current working directory is irrelevant.
 
 ## 1. Find the vault
 

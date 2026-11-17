@@ -150,7 +150,7 @@
     {
       "name": "vault",
       "source": "./plugins/vault",
-      "description": "Add anything to my Obsidian vault from any project: inbox tasks, board cards, learning notes, article/video summaries, and handoffs. Replaces the old personal-learning-vault target.",
+      "description": "My one place to track everything: add tasks, ideas, learning notes, summaries, and handoffs to my Obsidian vault and kanban board (ISoft, Makeshift, Tool Library, personal, AI) from any project, on any machine.",
       "version": "0.2.0",
       "author": {
         "name": "Robert McCown",
