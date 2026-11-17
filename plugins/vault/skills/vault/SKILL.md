@@ -1,51 +1,58 @@
 ---
 name: vault
-description: 'Save a learning note to the personal-learning-vault repo. Trigger when the user says "Vault: <topic> — <context>", invokes /vault, says "vault this", or a close variant — from any project. Writes a new doc and updates the index without asking for confirmation when the topic and context are clear.'
+description: 'Add anything to the user''s Obsidian vault (tasks, learning notes, summaries, handoffs) from any project, or show their board. Trigger on "Vault: <topic> — <context>", /vault, "vault this", "add to my vault", "add to my inbox", "put this on my board", "summarize this into my vault", "write a handoff to my vault", "what''s on my board", "what''s in Now", or a close variant. Not for a generic "remember this" with no mention of the vault.'
 ---
 
 # Vault
 
-## Overview
+The user keeps one Obsidian vault for everything: a kanban board of tasks across their life buckets, an inbox, learning notes, and handoffs. This skill works from any project; the current working directory is irrelevant.
 
-The user maintains a personal knowledge base at `~/Documents/GitHub/personal-learning-vault`. When they flag a topic mid-conversation, capture it as a doc in that repo. This works from any project; the current working directory is irrelevant.
+## 1. Find the vault
 
-## When to use
+Use the `VAULT_PATH` environment variable if it is set. Otherwise use `G:\My Drive\Vault` (the Google Drive path on both of the user's machines).
 
-Trigger on any of:
+Check that `Board.md` exists there. If it doesn't, stop and tell the user the path you tried. Do not create the vault or write anywhere else.
 
-- A message starting with `Vault:` followed by a topic and context (**explicit mode**)
-- The `/vault` slash command, with or without an argument (**inferred mode**)
-- The user says "vault this", "save this to my vault", or a close paraphrase (**inferred mode**)
+## 2. Read the vault's rules
 
-Do **not** trigger on generic "remember this" or "save this" — those go to memory, not the vault.
+Read `<vault>/README.md` before every write. It owns the file layout, card format, bucket tags, inbox rules, Jira rules, and the learning-doc style. If it disagrees with this skill, the README wins.
 
-## Resolving topic and context
+## 3. Decide what the request is
 
-You always need two things before writing: a **topic** (short noun phrase — the thing being learned) and a **context** (one sentence: what the user was building or trying to do when this came up). How you get them depends on how the skill was invoked.
+| The user says… | Kind | What you do |
+| --- | --- | --- |
+| A task, todo, "I should learn X", "investigate X", or anything vague | Inbox | Append one plain line `- <text>` to `Inbox.md`. No tag. |
+| "…put it on the board", or names a column/bucket ("add to Now as ISoft") | Card | Add a card to `Board.md` per the README conventions, in the column they named (default: top of `## Later`) |
+| "Vault: <topic> — <context>", "vault this", "remember this for my vault" | Learning doc | Write `learning/<kebab-case-topic>.md` from `learning/Template.md`; add a row at the top of the table in `learning/Index.md` |
+| "Summarize this article/video <link> into my vault" | Learning doc | Same as above. Put the source link in the header block; "Context" = why it was worth saving |
+| "Write a handoff to my vault" | Handoff | See section 4 |
+| "What's on my board?", "what's in Now?" | Read only | Read `Board.md`; show Now and Next as a short table (card, bucket). Don't edit anything. |
 
-**From an explicit `Vault:` message** — both are in the message. Use them directly.
+When unsure between Inbox and Card, use Inbox: triage sorts it later.
 
-**From `/vault <argument>`** — the argument is the topic (or a strong hint toward it). Derive context from the recent conversation.
+## 4. Handoffs
 
-**From `/vault` with no argument, or "vault this" / "save this to my vault"** — derive both from the recent conversation. Pull context from concrete details (file names, what was being debugged, the question that started the thread). The user has said they often can't articulate context themselves, so do that work for them when the conversation supports it.
+Every handoff gets a board card that links to it.
 
-**When inferring, ask the user if either topic or context is unclear** — ambiguous topic, vague topic with no obvious noun phrase, sparse conversation, no concrete context to pull from. Prefer offering 2–3 concrete candidates over open-ended questions. The user has explicitly said they'd rather be asked than have you guess. Only write without asking when both topic and context are obvious from what just happened.
+- **ISoft work** (the current repo belongs to ISoft, or the work is `#ISoft`): write the handoff in the current repo, `docs/handoff-<kebab-topic>.md`. Do not commit it; tell the user it needs committing and pushing so the other machine can see it. Add a card `- [ ] Resume: <topic> → [handoff](<GitHub URL on the current branch>) #ISoft` (plus `#ai` if it is AI work).
+- **Everything else**: write `handoffs/<YYYY-MM-DD> <Title>.md` in the vault and add a card linking it with `[[<YYYY-MM-DD> <Title>]]`.
+- If a card for that work already exists, append the link to it instead of adding a new card.
 
-## Process
+A handoff separates: decided, built, proposed but declined, not verified, left to do, and what Claude did on its own initiative. Lead with a status table.
 
-1. **Verify the vault repo exists.** Check that `~/Documents/GitHub/personal-learning-vault` is a directory. If it isn't (e.g. fresh machine, repo not yet cloned, user keeps it elsewhere), stop immediately and tell the user the expected path is missing. Do not attempt to create the directory, clone the repo, or write to a fallback path — ask them how to proceed.
+## 5. Resolving vague learning topics
 
-2. **Read the vault's own conventions first.** Open `~/Documents/GitHub/personal-learning-vault/CLAUDE.md`. It owns the doc template, the README index format, and the user's learning-style preferences. Follow whatever it says — if it has changed since this skill was written, the vault's CLAUDE.md wins.
+For a learning doc you need a **topic** (short noun phrase) and a **context** (one sentence: what the user was building when this came up).
 
-3. **Write the doc** to `~/Documents/GitHub/personal-learning-vault/docs/<kebab-case-topic>.md` using the template defined in the vault's CLAUDE.md. Pull the **Context** field from what the user said when flagging the topic, plus anything relevant from the current conversation (the code they were working on, the problem they hit). Examples should connect to that real context — that's the user's stated learning style.
-
-4. **Update the index** in `~/Documents/GitHub/personal-learning-vault/README.md` — add a row to the topic table per the format in the vault's CLAUDE.md. Sorted newest first.
-
-5. **Tell the user the filename** when done. No long summary, no preview of the doc body.
+- From `Vault: <topic> — <context>`: use both as given.
+- From `/vault <arg>` or "vault this": derive what's missing from the recent conversation (file names, what was being debugged, the question that started the thread).
+- If either is unclear, ask, offering 2–3 concrete candidates. The user would rather be asked than have you guess.
 
 ## Rules
 
-- **Do not ask for confirmation** before writing. The trigger is the confirmation.
-- **Do not commit.** Just write the files; the user handles git.
-- **Do not narrate** the doc contents back to the user — they'll read the file. A one-line "Saved to `docs/<filename>.md`" is enough.
-- If the topic file already exists, append a disambiguator (e.g. `-2`) rather than overwriting, and mention it in the reply.
+- **The trigger is the confirmation.** Don't ask before writing when the request is clear.
+- **Never edit the `%% kanban:settings %%` block** at the bottom of `Board.md`, and keep every card to one line.
+- **Never create a Jira ticket** without the user's explicit OK.
+- **Don't commit** anything in the vault. It syncs through Google Drive, not git.
+- If a file you'd create already exists, add `-2` to the name instead of overwriting, and say so.
+- **Reply in one line**: what you added and where, e.g. "Added to Inbox.md." or "Saved learning/grep.md and added it to the index." Don't read the content back.

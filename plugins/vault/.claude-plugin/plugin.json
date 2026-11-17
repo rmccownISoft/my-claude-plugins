@@ -1,14 +1,17 @@
 {
     "name": "vault",
-    "version": "0.1.0",
-    "description": "Save a learning note to the personal-learning-vault repo when the user flags a topic with the 'Vault:' trigger, regardless of which project they're currently in.",
+    "version": "0.2.0",
+    "description": "Add anything to my Obsidian vault from any project: inbox tasks, board cards, learning notes, article/video summaries, and handoffs. Replaces the old personal-learning-vault target.",
     "author": {
         "name": "Robert McCown",
         "email": "robertmccown2@gmail.com"
     },
     "keywords": [
-        "notes",
+        "obsidian",
+        "vault",
+        "tasks",
+        "kanban",
         "learning",
-        "knowledge-base"
+        "handoff"
     ]
 }
