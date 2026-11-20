@@ -1,5 +1,5 @@
 ---
-name: bobs-pr-review
+name: review
 description: 'Manual code review squad for ISoft branches. Dispatches independent reviewer subagents in parallel against the committed branch diff and writes one categorized report ending in a clear "Ready to hand off?" verdict. Run it on your branch before opening a PR, or against a live PR in the GitHub Action where it also posts the actionable findings as inline review comments on the diff. Catches the mistakes a human reviewer would. User-invocable only.'
 disable-model-invocation: true
 ---
@@ -23,7 +23,7 @@ the Handoff Summary as one top-level PR comment.
 > Should-fix. The pipeline is complete end-to-end; later phases add reviewers
 > without changing this flow.
 
-Invocation: `/bobs-pr-review` or `/bobs-pr-review <TICKET-KEY>`.
+Invocation: `/bobs-plugins:review` or `/bobs-plugins:review <TICKET-KEY>`.
 (The ticket arg is accepted now but unused until the Case Alignment reviewer lands.)
 
 ## Cross-cutting rules (every reviewer must obey)
@@ -198,7 +198,7 @@ When the reviewer(s) return:
    `mcp__github_inline_comment__create_inline_comment` is provided by the Claude
    Code GitHub Action and exists **only** in a `pull_request` context; use its
    presence as the signal that this is a live PR run. If it is not available (a
-   local `/bobs-pr-review` run, or a non-PR trigger), **skip this whole step
+   local `/bobs-plugins:review` run, or a non-PR trigger), **skip this whole step
    silently** — the file report from step 7 is the whole output, exactly as
    before, and nothing is posted to any PR.
 
