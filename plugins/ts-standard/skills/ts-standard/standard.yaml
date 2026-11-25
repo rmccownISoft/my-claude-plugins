@@ -1,0 +1,97 @@
+# standard.yaml — what every ISoft TypeScript project must have, as checks.
+#
+# One script run is both the survey and the verification:
+#   survey = run the checks          -> failing checks ARE the gap list
+#   verify = run the agreed checks   -> done = none of them fail
+#
+# DRAFT. Each check is taken from what isoft-dev's typescript-project skill says
+# create-typescript produces (line numbers are in claude-plugins'
+# plugins/isoft-dev/skills/typescript-project/SKILL.md). Confirm each one against a fresh
+# scaffold before trusting it; versions marked "placeholder" are guesses.
+#
+# SCHEMA
+#   checks[]               run in order; each needs an id and at least one assertion
+#     id                   kebab-case, unique; used by --only
+#     description          what the check protects, for people
+#     when                 { fact: value, ... }; the check is skipped unless all match
+#     -- assertions (all present ones must pass) --
+#     file                 path that must exist (relative to the project root)
+#     contains             string or list the `file` must contain (needs `file`)
+#     absent               path or list of paths that must NOT exist
+#     devDependencies      list of names, or { name, min } to require a minimum version
+#     scripts              package.json scripts that must exist
+#     packageJson          { has: [field], lacks: [field], equals: { field: value } }
+#                          fields may be dotted: devEngines.packageManager
+#
+# FACTS (read from the project by check.mjs, usable in `when`)
+#   packageManager  pnpm | npm | yarn | none   (from the lockfile)
+#   library         true unless package.json has "private": true
+#   typescript      tsconfig.json exists
+#   outDir          compilerOptions.outDir from tsconfig.json, or null
+#   testRunner      vitest | jest | mocha | node:test | none
+#   jiraPrefix      the -p value in the `changeset` script, or null
+
+version: 1
+
+checks:
+  - id: pnpm
+    description: Installs with pnpm, pinned, with no competing lockfile. (SKILL.md:414-425)
+    file: pnpm-lock.yaml
+    absent: [package-lock.json, yarn.lock]
+    packageJson:
+      has: [packageManager]
+      lacks: [devEngines.packageManager]
+
+  - id: core-scripts
+    description: The scripts CI and the verify step call.
+    scripts: [build, lint]
+
+  - id: eslint-flat-config
+    description: Flat ESLint config on the shared ISoft config; no legacy config left. (SKILL.md:427-435)
+    file: eslint.config.js
+    absent:
+      [
+        .eslintrc,
+        .eslintrc.js,
+        .eslintrc.cjs,
+        .eslintrc.json,
+        .eslintrc.yml,
+        .eslintrc.yaml,
+      ]
+    packageJson:
+      lacks: [eslintConfig]
+    devDependencies:
+      - { name: '@isoftdata/eslint-config-typescript', min: '3.0.0' } # placeholder minimum
+
+  - id: prettier
+    description: Prettier on the shared ISoft config, with format and format:check. (SKILL.md:516-520)
+    file: .prettierignore
+    devDependencies: [prettier, '@isoftdata/prettier-config-base']
+    scripts: [format, 'format:check']
+    packageJson:
+      equals: { prettier: '@isoftdata/prettier-config-base' }
+
+  - id: pre-commit-hook
+    description: husky runs lint-staged, which runs Prettier on staged files. (SKILL.md:542-552)
+    file: .husky/pre-commit
+    contains: lint-staged
+    devDependencies: [husky, lint-staged]
+    scripts: [prepare]
+    packageJson:
+      has: [lint-staged]
+
+  - id: ci
+    description: GitHub Actions builds, lints and tests every push and PR. (SKILL.md:240, 557)
+    file: .github/workflows/ci.yml
+    contains: [pull_request]
+
+  - id: line-endings
+    description: Git normalizes line endings to LF. (SKILL.md:492)
+    file: .gitattributes
+    contains: '* text=auto eol=lf'
+
+  - id: changesets
+    description: Libraries version and release through changesets.
+    when: { library: true }
+    file: .changeset/config.json
+    scripts: [changeset]

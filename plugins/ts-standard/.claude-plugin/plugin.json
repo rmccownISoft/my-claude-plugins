@@ -1,0 +1,10 @@
+{
+  "name": "ts-standard",
+  "version": "0.1.0",
+  "description": "Checks a TypeScript project against the ISoft standard defined in YAML. One tested script finds the gaps and confirms when they're closed.",
+  "author": {
+    "name": "Robert McCown",
+    "email": "rmccown@isoftdata.com"
+  },
+  "keywords": ["typescript", "eslint", "prettier", "ci", "standards"]
+}
