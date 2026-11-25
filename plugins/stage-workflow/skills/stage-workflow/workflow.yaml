@@ -1,0 +1,118 @@
+# workflow.yaml — the single source of truth for stages, gates, and what comes next.
+#
+# This example is a trimmed copy of the ai-workflow plugin's Story / Bug tracks so the
+# names are familiar. Replace the stages with your own; the shape stays the same.
+#
+# SCHEMA
+#   workflows.<name>             one state machine (here: prep = parent issues, dev = children)
+#     membership_label           flat label on every issue in this workflow (for one JQL query)
+#     stage_prefix               every stage label is <prefix><stage id>
+#     done_label                 replaces the stage label when a `finish` stage is promoted
+#     retired_labels             old labels to drop on the next write, never add
+#     start                      stage an issue enters at
+#     stages.<id>                stage ids are kebab-case; ORDER MATTERS (used by children_at_least)
+#       gate                     checks that must ALL pass before promoting (see list below)
+#       next                     stage id, or a list of { when, to } branches tried top to bottom
+#       finish: true             promoting this stage ends the workflow (stage label -> done_label)
+#       run                      content step to run on the way out, BEFORE labels change
+#       platform                 any | code   (code = needs repo access)
+#
+# GATE CHECKS (each is a tested function in workflow.mjs)
+#   not_flagged                            issue.flagged is false
+#   no_open_questions                      issue.openQuestions is empty
+#   has_section: <name>                    issue.sections contains <name>
+#   has_artifact: <name>                   issue.artifacts contains <name>
+#   pr_is: draft | ready | merged          issue.pr.state equals the value
+#   children_at_least: {workflow, stage}   every child is at or past <stage> in <workflow>
+#
+# `when` compares against the issue snapshot: a top-level field (issueType) or one in facts.
+
+version: 1
+
+workflows:
+  prep:
+    membership_label: ai-prep
+    stage_prefix: 'ai-prep:'
+    done_label: ai-done
+    retired_labels: ['ai-prep:active', 'ai-prep:settled']
+    start: refinement
+    stages:
+      refinement:
+        gate:
+          [not_flagged, no_open_questions, { has_section: Acceptance Criteria }]
+        next:
+          - when: { issueType: Bug }
+            to: reproduction
+          - to: scouting
+        run: scout-or-reproduce
+        platform: code
+
+      scouting:
+        gate: [not_flagged, no_open_questions, { has_artifact: scout-report }]
+        next: decomposed
+        run: decomposition
+        platform: any
+
+      reproduction:
+        gate:
+          [
+            not_flagged,
+            no_open_questions,
+            { has_artifact: reproduction-report },
+          ]
+        next:
+          - when: { fixScope: one-repo }
+            to: in-progress
+          - to: decomposed
+        platform: any
+
+      decomposed:
+        gate: [not_flagged, no_open_questions, { has_artifact: child-issues }]
+        next: in-progress
+        platform: any
+
+      in-progress:
+        gate:
+          [
+            not_flagged,
+            { children_at_least: { workflow: dev, stage: in-review } },
+          ]
+        next: review
+        platform: any
+
+      review:
+        gate:
+          - not_flagged
+          - { has_artifact: acceptance-criteria-checked }
+          - { children_at_least: { workflow: dev, stage: merged } }
+        finish: true
+        platform: any
+
+  dev:
+    membership_label: ai-dev
+    stage_prefix: 'ai-dev:'
+    start: ready-for-development
+    stages:
+      ready-for-development:
+        gate:
+          [not_flagged, no_open_questions, { has_section: Acceptance Criteria }]
+        next: in-progress
+        run: implementation
+        platform: code
+
+      in-progress:
+        gate: [not_flagged, { pr_is: draft }]
+        next: ready-for-preliminary-review
+        platform: any
+
+      ready-for-preliminary-review:
+        gate: [not_flagged, { pr_is: ready }]
+        next: in-review
+        platform: any
+
+      in-review:
+        gate: [not_flagged, { pr_is: merged }]
+        next: merged
+        platform: any
+
+      merged: {} # last stage: no next, nothing to promote to

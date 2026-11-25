@@ -1,0 +1,18 @@
+{
+  "key": "EEW-629",
+  "issueType": "Story",
+  "labels": [
+    "customer-acme",
+    "ai-prep",
+    "ai-prep:in-progress",
+    "ai-prep:settled"
+  ],
+  "flagged": false,
+  "openQuestions": [],
+  "sections": ["Acceptance Criteria", "Definition of Done"],
+  "artifacts": ["scout-report", "child-issues"],
+  "children": [
+    { "key": "EEW-630", "labels": ["ai-dev", "ai-dev:in-review"] },
+    { "key": "EEW-631", "labels": ["ai-dev", "ai-dev:in-progress"] }
+  ]
+}

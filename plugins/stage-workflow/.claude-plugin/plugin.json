@@ -1,0 +1,10 @@
+{
+  "name": "stage-workflow",
+  "version": "0.1.0",
+  "description": "Moves issues through a staged workflow defined in YAML. A tested script decides gates, next stage and labels; Claude does only the judgment work.",
+  "author": {
+    "name": "Robert McCown",
+    "email": "rmccown@isoftdata.com"
+  },
+  "keywords": ["workflow", "jira", "labels", "state-machine"]
+}
